@@ -4,6 +4,9 @@ import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.client.rendering.ColorDepth;
 import com.shinyhut.vernacular.protocol.messages.MessageHeaderFlags;
 import com.shinyhut.vernacular.client.rendering.ImageBuffer;
+
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -27,8 +30,7 @@ public class VernacularConfig {
     private boolean enableRreEncoding = true;
     private boolean enableHextileEncoding = true;
     private boolean enableZLibEncoding = false;
-
-    private Map<MessageHeaderFlags, Integer> maxSizePerFormat = new EnumMap<>(MessageHeaderFlags.class);
+    private final Map<MessageHeaderFlags, Integer> maxSizePerFormat = new EnumMap<>(MessageHeaderFlags.class);
 
     public Supplier<String> getUsernameSupplier() {
         return usernameSupplier;
