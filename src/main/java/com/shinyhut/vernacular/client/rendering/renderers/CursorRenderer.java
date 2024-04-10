@@ -2,10 +2,9 @@ package com.shinyhut.vernacular.client.rendering.renderers;
 
 import com.shinyhut.vernacular.client.exceptions.UnexpectedVncException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
+import com.shinyhut.vernacular.client.rendering.ImageBuffer;
 import com.shinyhut.vernacular.protocol.messages.Rectangle;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,8 +13,6 @@ import static com.shinyhut.vernacular.utils.ByteUtils.bitAt;
 
 public class CursorRenderer implements Renderer {
 
-    private static final int TRANSPARENT = new Color(0.0f, 0.0f, 0.0f, 0.0f).getRGB();
-
     private final RawRenderer rawRenderer;
 
     public CursorRenderer(RawRenderer rawRenderer) {
@@ -23,7 +20,7 @@ public class CursorRenderer implements Renderer {
     }
 
     @Override
-    public void render(InputStream in, BufferedImage destination, Rectangle rectangle) throws VncException {
+    public void render(InputStream in, ImageBuffer destination, Rectangle rectangle) throws VncException {
         try {
             rawRenderer.render(in, destination, 0, 0, rectangle.getWidth(), rectangle.getHeight());
 
@@ -37,7 +34,7 @@ public class CursorRenderer implements Renderer {
                 for (int i = 7; i >= 0; i--) {
                     boolean visible = bitAt(b, i);
                     if (!visible) {
-                        destination.setRGB(x, y, TRANSPARENT);
+                        destination.set(x, y,0);
                     }
                     if (++x == rectangle.getWidth()) {
                         x = 0;

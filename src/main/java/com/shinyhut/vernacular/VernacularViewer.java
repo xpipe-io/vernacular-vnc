@@ -2,6 +2,7 @@ package com.shinyhut.vernacular;
 
 import com.shinyhut.vernacular.client.VernacularClient;
 import com.shinyhut.vernacular.client.VernacularConfig;
+import com.shinyhut.vernacular.client.rendering.ImageBuffer;
 
 import javax.swing.*;
 import javax.swing.event.AncestorEvent;
@@ -10,6 +11,7 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 
 import static com.shinyhut.vernacular.client.rendering.ColorDepth.*;
 import static java.awt.BorderLayout.CENTER;
@@ -217,12 +219,27 @@ public class VernacularViewer extends JFrame {
         });
         config.setUsernameSupplier(this::showUsernameDialog);
         config.setPasswordSupplier(this::showPasswordDialog);
-        config.setScreenUpdateListener(this::renderFrame);
-        config.setMousePointerUpdateListener((p, h) -> this.setCursor(getDefaultToolkit().createCustomCursor(p, h, "vnc")));
+        config.setScreenUpdateListener(imageBuffer -> {
+            renderFrame(bufferToImage(imageBuffer));
+        });
+        config.setMousePointerUpdateListener((x, y, imageBuffer) -> {
+            this.setCursor(getDefaultToolkit().createCustomCursor(bufferToImage(imageBuffer), new Point(x, y), "vnc"));
+        });
         config.setBellListener(v -> getDefaultToolkit().beep());
         config.setRemoteClipboardListener(t -> getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(t), null));
         config.setUseLocalMousePointer(localCursorMenuItem.isSelected());
         client = new VernacularClient(config);
+    }
+
+    private BufferedImage bufferToImage(ImageBuffer buffer) {
+        var img = new BufferedImage(buffer.getWidth(), buffer.getHeight(),buffer.isAlpha() ?
+                BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB);
+        for (int x = 0; x < buffer.getWidth(); x++) {
+            for (int y = 0; y < buffer.getHeight(); y++) {
+                img.setRGB(x,y, buffer.get(x, y));
+            }
+        }
+        return img;
     }
 
     private void addMenu() {

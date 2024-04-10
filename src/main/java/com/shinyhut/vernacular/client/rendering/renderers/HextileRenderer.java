@@ -2,11 +2,10 @@ package com.shinyhut.vernacular.client.rendering.renderers;
 
 import com.shinyhut.vernacular.client.exceptions.UnexpectedVncException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
+import com.shinyhut.vernacular.client.rendering.ImageBuffer;
 import com.shinyhut.vernacular.protocol.messages.PixelFormat;
 import com.shinyhut.vernacular.protocol.messages.Rectangle;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -35,9 +34,8 @@ public class HextileRenderer implements Renderer {
     }
 
     @Override
-    public void render(InputStream in, BufferedImage destination, Rectangle rectangle) throws VncException {
+    public void render(InputStream in, ImageBuffer destination, Rectangle rectangle) throws VncException {
         DataInput dataInput = new DataInputStream(in);
-        Graphics2D g = (Graphics2D) destination.getGraphics();
 
         int horizontalTileCount = (rectangle.getWidth() + TILE_SIZE - 1) / TILE_SIZE;
         int verticalTileCount = (rectangle.getHeight() + TILE_SIZE - 1) / TILE_SIZE;
@@ -68,8 +66,7 @@ public class HextileRenderer implements Renderer {
                         lastBackground = background;
                         lastForeground = foreground;
 
-                        g.setColor(new Color(background.getRed(), background.getGreen(), background.getBlue()));
-                        g.fillRect(tileTopLeftX, tileTopLeftY, tileWidth, tileHeight);
+                        destination.fillRect(tileTopLeftX, tileTopLeftY, tileWidth, tileHeight, background.toInt());
 
                         if (hasSubrects) {
                             int subrectCount = dataInput.readUnsignedByte();
@@ -83,8 +80,7 @@ public class HextileRenderer implements Renderer {
                                 int subrectHeight = (dimensions & 0x0f) + 1;
                                 int subrectTopLeftX = tileTopLeftX + subrectX;
                                 int subrectTopLeftY = tileTopLeftY + subrectY;
-                                g.setColor(new Color(subrectColor.getRed(), subrectColor.getGreen(), subrectColor.getBlue()));
-                                g.fillRect(subrectTopLeftX, subrectTopLeftY, subrectWidth, subrectHeight);
+                                destination.fillRect(subrectTopLeftX, subrectTopLeftY, subrectWidth, subrectHeight, subrectColor.toInt());
                             }
                         }
                     }

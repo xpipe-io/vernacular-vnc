@@ -3,11 +3,7 @@ package com.shinyhut.vernacular.client;
 import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.client.rendering.ColorDepth;
 import com.shinyhut.vernacular.protocol.messages.MessageHeaderFlags;
-
-import java.awt.*;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.function.BiConsumer;
+import com.shinyhut.vernacular.client.rendering.ImageBuffer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -18,10 +14,10 @@ public class VernacularConfig {
     private Supplier<String> usernameSupplier;
     private Supplier<String> passwordSupplier;
     private Consumer<VncException> errorListener;
-    private Consumer<Image> screenUpdateListener;
+    private Consumer<ImageBuffer> screenUpdateListener;
     private Consumer<Void> bellListener;
     private Consumer<String> remoteClipboardListener;
-    private BiConsumer<Image, Point> mousePointerUpdateListener;
+    private MousePointerUpdateListener mousePointerUpdateListener;
     private boolean shared = true;
     private int targetFramesPerSecond = 30;
     private ColorDepth colorDepth = BPP_8_INDEXED;
@@ -74,7 +70,7 @@ public class VernacularConfig {
         this.errorListener = errorListener;
     }
 
-    public Consumer<Image> getScreenUpdateListener() {
+    public Consumer<ImageBuffer> getScreenUpdateListener() {
         return screenUpdateListener;
     }
 
@@ -83,13 +79,17 @@ public class VernacularConfig {
      * we receive a screen update.
      *
      * @param screenUpdateListener A Consumer which will receive Images representing the updated remote desktop
-     * @see java.awt.Image Image
      */
-    public void setScreenUpdateListener(Consumer<Image> screenUpdateListener) {
+    public void setScreenUpdateListener(Consumer<ImageBuffer> screenUpdateListener) {
         this.screenUpdateListener = screenUpdateListener;
     }
 
-    public BiConsumer<Image, Point> getMousePointerUpdateListener() {
+    public static interface MousePointerUpdateListener {
+
+        void update(int x, int y, ImageBuffer imageBuffer);
+    }
+
+    public MousePointerUpdateListener getMousePointerUpdateListener() {
         return mousePointerUpdateListener;
     }
 
@@ -99,9 +99,8 @@ public class VernacularConfig {
      * screen).
      *
      * @param mousePointerUpdateListener A Consumer which will receive Images representing the updated cursor shape
-     * @see java.awt.Image Image
      */
-    public void setMousePointerUpdateListener(BiConsumer<Image, Point> mousePointerUpdateListener) {
+    public void setMousePointerUpdateListener(MousePointerUpdateListener mousePointerUpdateListener) {
         this.mousePointerUpdateListener = mousePointerUpdateListener;
     }
 
@@ -188,7 +187,7 @@ public class VernacularConfig {
      * mouse pointer in framebuffer updates, and it should send separate notifications when the mouse pointer image
      * changes
      *
-     * @see #setMousePointerUpdateListener(BiConsumer)
+     * @see #setMousePointerUpdateListener(MousePointerUpdateListener)
      * @param useLocalMousePointer enable or disable client side mouse pointer rendering
      */
     public void setUseLocalMousePointer(boolean useLocalMousePointer) {

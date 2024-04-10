@@ -1,6 +1,5 @@
 package com.shinyhut.vernacular.utils;
 
-import java.awt.event.KeyEvent;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -110,17 +109,14 @@ public class KeySyms {
         SHIFT_CONTROL_CHARACTERS.put((char) 0x1a, 0x005a);
     }
 
-    public static Optional<Integer> forEvent(KeyEvent keyEvent) {
-        int keyCode = keyEvent.getKeyCode();
-        char symbol = keyEvent.getKeyChar();
-
+    public static Optional<Integer> map(int keyCode, char symbol, boolean shiftDown) {
         if (KEYCODES.containsKey(keyCode)) {
             return Optional.of(KEYCODES.get(keyCode));
         }
-        if (!keyEvent.isShiftDown() && CONTROL_CHARACTERS.containsKey(symbol)) {
+        if (!shiftDown && CONTROL_CHARACTERS.containsKey(symbol)) {
             return Optional.of(CONTROL_CHARACTERS.get(symbol));
         }
-        if (keyEvent.isShiftDown() && SHIFT_CONTROL_CHARACTERS.containsKey(symbol)) {
+        if (shiftDown && SHIFT_CONTROL_CHARACTERS.containsKey(symbol)) {
             return Optional.of(SHIFT_CONTROL_CHARACTERS.get(symbol));
         }
         if (symbol != CHAR_UNDEFINED) {

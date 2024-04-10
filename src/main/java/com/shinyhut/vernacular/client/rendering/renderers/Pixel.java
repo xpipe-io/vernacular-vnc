@@ -12,6 +12,10 @@ public class Pixel {
         this.blue = blue;
     }
 
+    public int toInt() {
+        return 0xFF000000 + (red << 16) + (green << 8) + blue;
+    }
+
     public int getRed() {
         return red;
     }

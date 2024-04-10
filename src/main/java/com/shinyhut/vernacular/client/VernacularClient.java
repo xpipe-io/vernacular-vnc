@@ -177,7 +177,7 @@ public class VernacularClient {
      * @see java.awt.event.KeyEvent KeyEvent
      */
     public void handleKeyEvent(KeyEvent event) {
-        KeySyms.forEvent(event).ifPresent(k -> {
+        KeySyms.map(event.getKeyCode(), event.getKeyChar(), event.isShiftDown()).ifPresent(k -> {
             switch (event.getID()) {
                 case KEY_PRESSED:
                 case KEY_RELEASED:

@@ -1,5 +1,6 @@
 package com.shinyhut.vernacular.client.rendering;
 
+import com.shinyhut.vernacular.client.VernacularConfig;
 import com.shinyhut.vernacular.client.VncSession;
 import com.shinyhut.vernacular.client.exceptions.UnexpectedVncException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
@@ -7,21 +8,13 @@ import com.shinyhut.vernacular.client.rendering.renderers.*;
 import com.shinyhut.vernacular.protocol.messages.*;
 import com.shinyhut.vernacular.protocol.messages.Rectangle;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static com.shinyhut.vernacular.protocol.messages.Encoding.*;
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
-import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
 public class Framebuffer {
 
@@ -30,7 +23,7 @@ public class Framebuffer {
     private final Map<Encoding, Renderer> renderers = new ConcurrentHashMap<>();
     private final CursorRenderer cursorRenderer;
 
-    private BufferedImage frame;
+    private ImageBuffer frame;
 
     public Framebuffer(VncSession session) {
         PixelDecoder pixelDecoder = new PixelDecoder(colorMap);
@@ -42,7 +35,7 @@ public class Framebuffer {
         renderers.put(ZLIB, new ZLibRenderer(rawRenderer));
         cursorRenderer = new CursorRenderer(rawRenderer);
 
-        frame = new BufferedImage(session.getFramebufferWidth(), session.getFramebufferHeight(), TYPE_INT_RGB);
+        frame = new ImageBuffer(session.getFramebufferWidth(), session.getFramebufferHeight(), false);
         this.session = session;
     }
 
@@ -67,12 +60,9 @@ public class Framebuffer {
     }
 
     private void paint() {
-        Consumer<Image> listener = session.getConfig().getScreenUpdateListener();
+        Consumer<ImageBuffer> listener = session.getConfig().getScreenUpdateListener();
         if (listener != null) {
-            ColorModel colorModel = frame.getColorModel();
-            WritableRaster raster = frame.copyData(null);
-            BufferedImage copy = new BufferedImage(colorModel, raster, colorModel.isAlphaPremultiplied(), null);
-            listener.accept(copy);
+            listener.accept(frame);
         }
     }
 
@@ -87,18 +77,20 @@ public class Framebuffer {
         int height = newSize.getHeight();
         session.setFramebufferWidth(width);
         session.setFramebufferHeight(height);
-        BufferedImage resized = new BufferedImage(width, height, TYPE_INT_RGB);
-        resized.getGraphics().drawImage(frame, 0, 0, null);
+        var resized = new ImageBuffer(width, height, false);
         frame = resized;
+//        BufferedImage resized = new BufferedImage(width, height, TYPE_INT_RGB);
+//        resized.getGraphics().drawImage(frame, 0, 0, null);
+//        frame = resized;
     }
 
     private void updateCursor(Rectangle cursor, InputStream in) throws VncException {
         if (cursor.getWidth() > 0 && cursor.getHeight() > 0) {
-            BufferedImage cursorImage = new BufferedImage(cursor.getWidth(), cursor.getHeight(), TYPE_INT_ARGB);
+            ImageBuffer cursorImage = new ImageBuffer(cursor.getWidth(), cursor.getHeight(), true);
             cursorRenderer.render(in, cursorImage, cursor);
-            BiConsumer<Image, Point> listener = session.getConfig().getMousePointerUpdateListener();
+            VernacularConfig.MousePointerUpdateListener listener = session.getConfig().getMousePointerUpdateListener();
             if (listener != null) {
-                listener.accept(cursorImage, new Point(cursor.getX(), cursor.getY()));
+                listener.update(cursor.getX(), cursor.getY(), cursorImage);
             }
         }
     }

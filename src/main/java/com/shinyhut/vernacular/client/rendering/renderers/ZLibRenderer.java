@@ -2,9 +2,9 @@ package com.shinyhut.vernacular.client.rendering.renderers;
 
 import com.shinyhut.vernacular.client.exceptions.UnexpectedVncException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
+import com.shinyhut.vernacular.client.rendering.ImageBuffer;
 import com.shinyhut.vernacular.protocol.messages.Rectangle;
 
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
@@ -20,7 +20,7 @@ public class ZLibRenderer implements Renderer {
     }
 
     @Override
-    public void render(InputStream in, BufferedImage destination, Rectangle rectangle) throws VncException {
+    public void render(InputStream in, ImageBuffer destination, Rectangle rectangle) throws VncException {
         try {
             DataInput dataInput = new DataInputStream(in);
             int compressedLength = dataInput.readInt();
