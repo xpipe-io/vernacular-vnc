@@ -1,6 +1,8 @@
 package com.shinyhut.vernacular.protocol.messages;
 
+import com.shinyhut.vernacular.client.exceptions.HandshakingFailedException;
 import com.shinyhut.vernacular.client.exceptions.InvalidMessageException;
+import com.shinyhut.vernacular.client.exceptions.UnexpectedVncException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
 
 import java.io.*;
@@ -47,6 +49,10 @@ public class ProtocolVersion implements Encodable {
     public static ProtocolVersion decode(InputStream in) throws VncException, IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         String message = br.readLine();
+        if (message == null) {
+            throw new IOException("Received no response from server. Is a VNC server running?");
+        }
+
         Matcher matcher = PROTOCOL_VERSION_MESSAGE.matcher(message);
         if (matcher.matches()) {
             String major = matcher.group(1);
