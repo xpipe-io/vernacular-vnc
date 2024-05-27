@@ -11,4 +11,6 @@ open module com.shinyhut.vernacular {
     exports com.shinyhut.vernacular.utils;
 
     requires java.desktop;
+    requires static lombok;
+    requires org.bouncycastle.provider;
 }

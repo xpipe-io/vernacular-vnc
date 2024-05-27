@@ -8,6 +8,7 @@ public enum SecurityType {
 
     NONE(1),
     VNC(2),
+    RA2NE(6),
     MS_LOGON_2(113);
 
     private final int code;
