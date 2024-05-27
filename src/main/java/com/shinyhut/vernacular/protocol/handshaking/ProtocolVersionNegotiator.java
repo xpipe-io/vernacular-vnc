@@ -1,6 +1,7 @@
 package com.shinyhut.vernacular.protocol.handshaking;
 
 import com.shinyhut.vernacular.client.VncSession;
+import com.shinyhut.vernacular.client.exceptions.RealVncProtocolVersionException;
 import com.shinyhut.vernacular.client.exceptions.UnsupportedProtocolVersionException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.protocol.messages.ProtocolVersion;
@@ -11,6 +12,7 @@ import static java.lang.Math.min;
 
 public class ProtocolVersionNegotiator {
 
+    private static final int REALVNC_MAJOR_VERSION = 4;
     private static final int MAJOR_VERSION = 3;
     private static final int MIN_MINOR_VERSION = 3;
     private static final int MAX_MINOR_VERSION = 8;
@@ -24,6 +26,15 @@ public class ProtocolVersionNegotiator {
                     serverVersion.getMinor(),
                     MAJOR_VERSION,
                     MIN_MINOR_VERSION
+            );
+        }
+
+        if (!serverVersion.atLeast(REALVNC_MAJOR_VERSION, 0)) {
+            throw new RealVncProtocolVersionException(
+                    serverVersion.getMajor(),
+                    serverVersion.getMinor(),
+                    MAJOR_VERSION,
+                    MAX_MINOR_VERSION
             );
         }
 

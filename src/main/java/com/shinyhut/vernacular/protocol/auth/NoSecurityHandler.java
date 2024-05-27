@@ -17,7 +17,7 @@ public class NoSecurityHandler implements SecurityHandler {
         if (!protocolVersion.equals(3, 3)) {
             new DataOutputStream(session.getOutputStream()).writeByte(NONE.getCode());
         }
-        if (protocolVersion.equals(3, 8)) {
+        if (protocolVersion.atLeast(3, 8)) {
             return SecurityResult.decode(session.getInputStream(), session.getProtocolVersion());
         } else {
             return new SecurityResult(true);

@@ -43,7 +43,7 @@ public class ProtocolVersion implements Encodable {
     }
 
     public boolean atLeast(int major, int minor) {
-        return this.major >= major && this.minor >= minor;
+        return this.major > major || (this.major == major && this.minor >= minor);
     }
 
     public static ProtocolVersion decode(InputStream in) throws VncException, IOException {

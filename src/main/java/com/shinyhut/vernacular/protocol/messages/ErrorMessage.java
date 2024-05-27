@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class ErrorMessage {
 
@@ -22,7 +23,7 @@ public class ErrorMessage {
         int errorMessageLength = dataInput.readInt();
         byte[] errorMessageBytes = new byte[errorMessageLength];
         dataInput.readFully(errorMessageBytes);
-        return new ErrorMessage(new String(errorMessageBytes, Charset.forName("US-ASCII")));
+        return new ErrorMessage(new String(errorMessageBytes, StandardCharsets.UTF_8));
     }
 
 }
