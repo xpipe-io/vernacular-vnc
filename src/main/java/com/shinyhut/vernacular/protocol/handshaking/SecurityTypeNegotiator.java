@@ -3,10 +3,7 @@ package com.shinyhut.vernacular.protocol.handshaking;
 import com.shinyhut.vernacular.client.VncSession;
 import com.shinyhut.vernacular.client.exceptions.NoSupportedSecurityTypesException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
-import com.shinyhut.vernacular.protocol.auth.MsLogon2AuthenticationHandler;
-import com.shinyhut.vernacular.protocol.auth.NoSecurityHandler;
-import com.shinyhut.vernacular.protocol.auth.SecurityHandler;
-import com.shinyhut.vernacular.protocol.auth.VncAuthenticationHandler;
+import com.shinyhut.vernacular.protocol.auth.*;
 import com.shinyhut.vernacular.protocol.messages.SecurityType;
 import com.shinyhut.vernacular.protocol.messages.ServerSecurityType;
 import com.shinyhut.vernacular.protocol.messages.ServerSecurityTypes;
@@ -36,6 +33,8 @@ public class SecurityTypeNegotiator {
             return new VncAuthenticationHandler();
         } else if (securityTypes.contains(MS_LOGON_2)) {
             return new MsLogon2AuthenticationHandler();
+        } else if (securityTypes.contains(RA2NE)) {
+            return new RsaAesAuthenticationHandler(128);
         } else {
             throw new NoSupportedSecurityTypesException();
         }
