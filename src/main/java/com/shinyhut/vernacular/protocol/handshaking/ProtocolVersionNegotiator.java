@@ -29,7 +29,7 @@ public class ProtocolVersionNegotiator {
             );
         }
 
-        if (!serverVersion.atLeast(REALVNC_MAJOR_VERSION, 0)) {
+        if (serverVersion.atLeast(REALVNC_MAJOR_VERSION, 0)) {
             throw new RealVncProtocolVersionException(
                     serverVersion.getMajor(),
                     serverVersion.getMinor(),
