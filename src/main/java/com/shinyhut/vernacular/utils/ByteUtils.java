@@ -1,5 +1,7 @@
 package com.shinyhut.vernacular.utils;
 
+import java.math.BigInteger;
+
 import static java.lang.System.arraycopy;
 
 public class ByteUtils {
@@ -41,5 +43,13 @@ public class ByteUtils {
         byte[] padded = new byte[length];
         arraycopy(input, 0, padded, 0, input.length);
         return padded;
+    }
+
+    public static byte[] bigIntToBytes(BigInteger n, int bytes) {
+        var b = n.toByteArray();
+        var l = Math.min(b.length, bytes);
+        var res = new byte[bytes];
+        System.arraycopy(b, b.length - l, res, bytes - l, l);
+        return res;
     }
 }

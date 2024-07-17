@@ -12,6 +12,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -20,8 +21,7 @@ public class AesEaxOutputStream {
     private final byte[] key;
     private final EAXBlockCipher cipher;
     private final OutputStream outputStream;
-    private int counter;
-    private final byte[] nonce = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    private BigInteger nonce = BigInteger.ZERO;
 
     public AesEaxOutputStream(byte[] key, OutputStream outputStream) {
         this.key = key;
@@ -30,9 +30,9 @@ public class AesEaxOutputStream {
     }
 
     public void write(byte[] b) throws Exception {
-        nonce[0] = (byte) counter;
-        counter++;
-        cipher.init(true, new AEADParameters(new KeyParameter(key), 16 * 8, nonce));
+        var nonceBytes = ByteUtils.bigIntToBytes(nonce,16);
+        nonce = nonce.add(BigInteger.ONE);
+        cipher.init(true, new AEADParameters(new KeyParameter(key), 16 * 8, nonceBytes));
 
         var lengthBytes = Arrays.copyOfRange(ByteBuffer.allocate(4).putInt(b.length).array(), 2,4);
         var out = new byte[1024];

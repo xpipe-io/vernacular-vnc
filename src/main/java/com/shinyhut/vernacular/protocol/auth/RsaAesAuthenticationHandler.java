@@ -5,6 +5,7 @@ import com.shinyhut.vernacular.client.exceptions.SecurityTypeFailedException;
 import com.shinyhut.vernacular.protocol.messages.SecurityResult;
 import com.shinyhut.vernacular.utils.AesEaxInputStream;
 import com.shinyhut.vernacular.utils.AesEaxOutputStream;
+import com.shinyhut.vernacular.utils.ByteUtils;
 import lombok.SneakyThrows;
 
 import javax.crypto.BadPaddingException;
@@ -45,6 +46,7 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
     private AesEaxInputStream encryptedInput;
     private AesEaxOutputStream encryptedOutput;
     private VncSession session;
+
     @SneakyThrows
     public RsaAesAuthenticationHandler(int keySize) {
         this.keySize = keySize;
@@ -135,8 +137,8 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
         var modulus = rsaKey.getModulus();
         var publicExponent = rsaKey.getPublicExponent();
 
-        clientKeyN = bigIntToBytes(modulus, (clientKeyLength + 7) / 8);
-        clientKeyE = bigIntToBytes(publicExponent, (clientKeyLength + 7) / 8);
+        clientKeyN = ByteUtils.bigIntToBytes(modulus, (clientKeyLength + 7) / 8);
+        clientKeyE = ByteUtils.bigIntToBytes(publicExponent, (clientKeyLength + 7) / 8);
         data.writeInt(clientKeyLength);
         data.write(clientKeyN);
         data.write(clientKeyE);
@@ -263,13 +265,5 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
         buf.put((byte) pw.length);
         buf.put(pw);
         encryptedOutput.write(buf.array());
-    }
-
-    private static byte[] bigIntToBytes(BigInteger n, int bytes) {
-        var b = n.toByteArray();
-        var l = Math.min(b.length, bytes);
-        var res = new byte[bytes];
-        System.arraycopy(b, b.length - l, res, bytes - l, l);
-        return res;
     }
 }

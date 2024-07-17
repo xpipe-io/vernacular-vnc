@@ -6,6 +6,7 @@ import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -14,8 +15,7 @@ public class AesEaxInputStream {
     private final byte[] key;
     private final EAXBlockCipher cipher;
     private final InputStream inputStream;
-    private int counter;
-    private final byte[] nonce = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    private BigInteger nonce = BigInteger.ZERO;
 
     public AesEaxInputStream(byte[] key, InputStream inputStream) {
         this.key = key;
@@ -24,10 +24,9 @@ public class AesEaxInputStream {
     }
 
     public byte[] read() throws Exception {
-        nonce[0] = (byte) counter;
-        //TODO: Increment array better
-        counter++;
-        cipher.init(false, new AEADParameters(new KeyParameter(key), 16 * 8, nonce));
+        var nonceBytes = ByteUtils.bigIntToBytes(nonce,16);
+        nonce = nonce.add(BigInteger.ONE);
+        cipher.init(false, new AEADParameters(new KeyParameter(key), 16 * 8, nonceBytes));
 
         var out = new byte[1024];
         var length = new DataInputStream(inputStream).readUnsignedShort();
