@@ -1,6 +1,7 @@
 package com.shinyhut.vernacular.utils;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 
 import static java.lang.System.arraycopy;
 
@@ -45,11 +46,18 @@ public class ByteUtils {
         return padded;
     }
 
-    public static byte[] bigIntToBytes(BigInteger n, int bytes) {
+    public static byte[] bigIntToBytes(BigInteger n, int bytes, boolean reverse) {
         var b = n.toByteArray();
         var l = Math.min(b.length, bytes);
         var res = new byte[bytes];
         System.arraycopy(b, b.length - l, res, bytes - l, l);
+        if (reverse) {
+            for(int i = 0; i < res.length / 2; i++) {
+                byte temp = res[i];
+                res[i] = res[res.length - i - 1];
+                res[res.length - i - 1] = temp;
+            }
+        }
         return res;
     }
 }

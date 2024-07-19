@@ -1,5 +1,6 @@
 package com.shinyhut.vernacular.utils;
 
+import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESLightEngine;
 import org.bouncycastle.crypto.io.CipherInputStream;
 import org.bouncycastle.crypto.io.CipherOutputStream;
@@ -29,8 +30,8 @@ public class AesEaxOutputStream {
         this.outputStream = outputStream;
     }
 
-    public void write(byte[] b) throws Exception {
-        var nonceBytes = ByteUtils.bigIntToBytes(nonce,16);
+    public void write(byte[] b) throws IOException {
+        var nonceBytes = ByteUtils.bigIntToBytes(nonce,16, true);
         nonce = nonce.add(BigInteger.ONE);
         cipher.init(true, new AEADParameters(new KeyParameter(key), 16 * 8, nonceBytes));
 
@@ -38,7 +39,11 @@ public class AesEaxOutputStream {
         var out = new byte[1024];
         cipher.processAADBytes(lengthBytes, 0, 2);
         var length = cipher.processBytes(b,0,b.length, out, 0);
-        length += cipher.doFinal(out, length);
+        try {
+            length += cipher.doFinal(out, length);
+        } catch (InvalidCipherTextException e) {
+            throw new IOException("Cipher failed", e);
+        }
         outputStream.write(lengthBytes);
         outputStream.write(out,0, length);
         outputStream.flush();

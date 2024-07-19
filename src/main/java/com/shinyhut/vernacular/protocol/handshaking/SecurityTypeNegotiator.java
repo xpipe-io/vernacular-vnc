@@ -34,7 +34,9 @@ public class SecurityTypeNegotiator {
         } else if (securityTypes.contains(MS_LOGON_2)) {
             return new MsLogon2AuthenticationHandler();
         } else if (securityTypes.contains(RA2NE)) {
-            return new RsaAesAuthenticationHandler(128);
+            return RsaAesAuthenticationHandler.RA2(RA2NE.getCode());
+        } else if (securityTypes.contains(RA2NE_256)) {
+            return RsaAesAuthenticationHandler.RA2_256(RA2NE_256.getCode());
         } else {
             throw new NoSupportedSecurityTypesException();
         }

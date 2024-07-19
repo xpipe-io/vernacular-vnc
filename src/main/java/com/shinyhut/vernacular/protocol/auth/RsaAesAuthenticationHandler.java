@@ -2,10 +2,12 @@ package com.shinyhut.vernacular.protocol.auth;
 
 import com.shinyhut.vernacular.client.VncSession;
 import com.shinyhut.vernacular.client.exceptions.SecurityTypeFailedException;
+import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.protocol.messages.SecurityResult;
 import com.shinyhut.vernacular.utils.AesEaxInputStream;
 import com.shinyhut.vernacular.utils.AesEaxOutputStream;
 import com.shinyhut.vernacular.utils.ByteUtils;
+import com.shinyhut.vernacular.utils.CryptoUtils;
 import lombok.SneakyThrows;
 
 import javax.crypto.BadPaddingException;
@@ -46,15 +48,24 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
     private AesEaxInputStream encryptedInput;
     private AesEaxOutputStream encryptedOutput;
     private VncSession session;
+    private final int authCode;
 
-    @SneakyThrows
-    public RsaAesAuthenticationHandler(int keySize) {
+    public static RsaAesAuthenticationHandler RA2(int authCode) {
+        return new RsaAesAuthenticationHandler(128, CryptoUtils.sha1(), authCode);
+    }
+
+    public static RsaAesAuthenticationHandler RA2_256(int authCode) {
+        return new RsaAesAuthenticationHandler(256, CryptoUtils.sha256(), authCode);
+    }
+
+    private RsaAesAuthenticationHandler(int keySize, MessageDigest digest, int authCode) {
         this.keySize = keySize;
-        this.digest = MessageDigest.getInstance(keySize == 128 ? "SHA-1" : "SHA-256");
+        this.digest = digest;
+        this.authCode = authCode;
     }
 
     @Override
-    public SecurityResult authenticate(VncSession session) throws IOException {
+    public SecurityResult authenticate(VncSession session) throws VncException, IOException {
         this.session = session;
         rawInput = session.getInputStream();
         rawOutput = session.getOutputStream();
@@ -80,11 +91,10 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
     }
 
     private void requestAuthentication() throws IOException {
-        rawOutput.write(RA2NE.getCode());
+        rawOutput.write(authCode);
     }
 
-    @SneakyThrows
-    private void readPublicKey() {
+    private void readPublicKey() throws VncException, IOException {
         var data = new DataInputStream(rawInput);
         serverKeyLength = data.readInt();
         if (serverKeyLength < MIN_KEY_LENGTH) {
@@ -102,16 +112,15 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
         var publicExponent = new BigInteger(1, serverKeyE);
         var spec = new RSAPublicKeySpec(modulus, publicExponent);
         try {
-            var factory = KeyFactory.getInstance("RSA");
+            var factory = CryptoUtils.rsaKeyFactory();
             serverKey = factory.generatePublic(spec);
         } catch (InvalidKeySpecException e) {
             throw new SecurityTypeFailedException("Server key is invalid");
         }
     }
 
-    @SneakyThrows
-    private void verifyServer() {
-        MessageDigest digest = MessageDigest.getInstance("SHA-1");
+    private void verifyServer() throws VncException, IOException {
+        MessageDigest digest = CryptoUtils.sha1();
         var length = new byte[4];
         length[0] = (byte) ((serverKeyLength & 0xff000000) >> 24);
         length[1] = (byte) ((serverKeyLength & 0xff0000) >> 16);
@@ -124,11 +133,10 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
         //TODO: verify digest with format string %02x-%02x-%02x-%02x-%02x-%02x-%02x-%02x
     }
 
-    @SneakyThrows
-    private void writePublicKey() {
+    private void writePublicKey() throws VncException, IOException {
         var data = new DataOutputStream(rawOutput);
         clientKeyLength = serverKeyLength;
-        var kpg = KeyPairGenerator.getInstance("RSA");
+        var kpg = CryptoUtils.rsaKeyPairGenerator();
         kpg.initialize(clientKeyLength);
         KeyPair kp = kpg.generateKeyPair();
         clientKey = kp.getPrivate();
@@ -137,22 +145,21 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
         var modulus = rsaKey.getModulus();
         var publicExponent = rsaKey.getPublicExponent();
 
-        clientKeyN = ByteUtils.bigIntToBytes(modulus, (clientKeyLength + 7) / 8);
-        clientKeyE = ByteUtils.bigIntToBytes(publicExponent, (clientKeyLength + 7) / 8);
+        clientKeyN = ByteUtils.bigIntToBytes(modulus, (clientKeyLength + 7) / 8, false);
+        clientKeyE = ByteUtils.bigIntToBytes(publicExponent, (clientKeyLength + 7) / 8, false);
         data.writeInt(clientKeyLength);
         data.write(clientKeyN);
         data.write(clientKeyE);
     }
 
-    @SneakyThrows
-    private void writeRandom() {
+    private void writeRandom() throws VncException, IOException {
         var data = new DataOutputStream(rawOutput);
         var sr = new SecureRandom();
         clientRandom = new byte[keySize / 8];
         sr.nextBytes(clientRandom);
         byte[] encrypted;
         try {
-            var cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            var cipher = CryptoUtils.rsaEcbPkcs1PaddingCipher();
             cipher.init(Cipher.ENCRYPT_MODE, serverKey);
             encrypted = cipher.doFinal(clientRandom);
         } catch (InvalidKeyException | IllegalBlockSizeException |
@@ -163,8 +170,7 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
         data.write(encrypted);
     }
 
-    @SneakyThrows
-    private void readRandom() {
+    private void readRandom() throws VncException, IOException {
         var data = new DataInputStream(rawInput);
         var size = data.readShort();
         if (size != clientKeyN.length) {
@@ -173,7 +179,7 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
         var buffer = new byte[size];
         data.readFully(buffer);
         try {
-            var cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            var cipher = CryptoUtils.rsaEcbPkcs1PaddingCipher();
             cipher.init(Cipher.DECRYPT_MODE, clientKey);
             serverRandom = cipher.doFinal(buffer);
         } catch (InvalidKeyException | IllegalBlockSizeException |
@@ -185,8 +191,7 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
         }
     }
 
-    @SneakyThrows
-    private void setCipher() {
+    private void setCipher() throws VncException, IOException {
         digest.update(clientRandom);
         digest.update(serverRandom);
         var key = Arrays.copyOfRange(digest.digest(), 0, keySize / 8);
@@ -198,8 +203,7 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
         encryptedOutput = new AesEaxOutputStream(key, rawOutput);
     }
 
-    @SneakyThrows
-    private void writeHash() {
+    private void writeHash() throws VncException, IOException {
        var lenServerKey = new byte[]{
                 (byte) ((serverKeyLength & 0xff000000) >> 24),
                 (byte) ((serverKeyLength & 0xff0000) >> 16),
@@ -222,8 +226,7 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
         encryptedOutput.write(hash);
     }
 
-    @SneakyThrows
-    void readHash() {
+    void readHash() throws VncException, IOException {
         var lenServerKey = new byte[]{
                 (byte) ((serverKeyLength & 0xff000000) >> 24),
                 (byte) ((serverKeyLength & 0xff0000) >> 16),
@@ -249,16 +252,14 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
         }
     }
 
-    @SneakyThrows
-    private void readSubtype() {
+    private void readSubtype() throws VncException, IOException {
         subtype = encryptedInput.read()[0];
         if (subtype != 1 && subtype != 2) {
             throw new SecurityTypeFailedException("Unknown RSA-AES authentication subtype");
         }
     }
 
-    @SneakyThrows
-    private void writeCredentials() {
+    private void writeCredentials() throws VncException, IOException {
         var pw = session.getConfig().getPasswordSupplier().get().getBytes(StandardCharsets.UTF_8);
         var buf = ByteBuffer.allocate(1 + 1 + pw.length);
         buf.put((byte) 0);

@@ -35,7 +35,8 @@ public class ServerSecurityTypes {
 
         for (int i = 0; i < typeCount; i++) {
             byte type = dataInput.readByte();
-            resolve(type).ifPresent(types::add);
+            var code = type & 0xFF;
+            resolve(code).ifPresent(types::add);
         }
 
         return new ServerSecurityTypes(types);

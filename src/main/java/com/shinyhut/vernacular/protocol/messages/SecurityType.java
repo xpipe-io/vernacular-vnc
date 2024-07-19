@@ -9,7 +9,8 @@ public enum SecurityType {
     NONE(1),
     VNC(2),
     RA2NE(6),
-    MS_LOGON_2(113);
+    MS_LOGON_2(113),
+    RA2NE_256(130);
 
     private final int code;
 
