@@ -21,7 +21,7 @@ public class ServerSecurityType {
         return securityType;
     }
 
-    public static ServerSecurityType decode(InputStream in) throws HandshakingFailedException, NoSupportedSecurityTypesException, IOException {
+    public static Integer decode(InputStream in) throws HandshakingFailedException, NoSupportedSecurityTypesException, IOException {
         DataInputStream dataInput = new DataInputStream(in);
         int type = dataInput.readInt();
 
@@ -30,6 +30,6 @@ public class ServerSecurityType {
             throw new HandshakingFailedException(errorMessage.getMessage());
         }
 
-        return resolve(type).map(ServerSecurityType::new).orElseThrow(NoSupportedSecurityTypesException::new);
+        return type;
     }
 }

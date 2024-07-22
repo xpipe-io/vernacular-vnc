@@ -12,13 +12,13 @@ import static com.shinyhut.vernacular.protocol.messages.SecurityType.resolve;
 
 public class ServerSecurityTypes {
 
-    private final List<SecurityType> securityTypes;
+    private final List<Integer> securityTypes;
 
-    private ServerSecurityTypes(List<SecurityType> securityTypes) {
+    private ServerSecurityTypes(List<Integer> securityTypes) {
         this.securityTypes = securityTypes;
     }
 
-    public List<SecurityType> getSecurityTypes() {
+    public List<Integer> getSecurityTypes() {
         return securityTypes;
     }
 
@@ -31,12 +31,12 @@ public class ServerSecurityTypes {
             throw new HandshakingFailedException(errorMessage.getMessage());
         }
 
-        List<SecurityType> types = new ArrayList<>();
+        List<Integer> types = new ArrayList<>();
 
         for (int i = 0; i < typeCount; i++) {
             byte type = dataInput.readByte();
             var code = type & 0xFF;
-            resolve(code).ifPresent(types::add);
+            types.add(code);
         }
 
         return new ServerSecurityTypes(types);
