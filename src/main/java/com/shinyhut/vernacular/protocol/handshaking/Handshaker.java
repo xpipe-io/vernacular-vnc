@@ -18,7 +18,7 @@ public class Handshaker {
         securityTypeNegotiator = new SecurityTypeNegotiator();
     }
 
-    public void handshake(VncSession session) throws VncException, IOException {
+    public SecurityHandler handshake(VncSession session) throws VncException, IOException {
         protocolVersionNegotiator.negotiate(session);
 
         SecurityHandler securityHandler = securityTypeNegotiator.negotiate(session);
@@ -30,6 +30,8 @@ public class Handshaker {
             } else {
                 throw new AuthenticationFailedException();
             }
+        } else {
+            return securityHandler;
         }
     }
 }

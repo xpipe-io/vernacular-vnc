@@ -276,7 +276,10 @@ public class VernacularClient {
         OutputStream out = socket.getOutputStream();
         session = new VncSession(config, in, out);
 
-        handshaker.handshake(session);
+        var handler = handshaker.handshake(session);
+        session.setMessageDecoder(handler.getSessionDecoder(session));
+        session.setMessageEncoder(handler.getSessionEncoder(session));
+
         initializer.initialise(session);
     }
 

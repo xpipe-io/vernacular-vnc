@@ -40,8 +40,8 @@ public class Framebuffer {
     }
 
     public void processUpdate(FramebufferUpdate update) throws VncException {
-        InputStream in = session.getInputStream();
         try {
+            var in = session.getMessageDecoder().getInputStream();
             for (int i = 0; i < update.getNumberOfRectangles(); i++) {
                 Rectangle rectangle = Rectangle.decode(in);
                 if (rectangle.getEncoding() == DESKTOP_SIZE) {

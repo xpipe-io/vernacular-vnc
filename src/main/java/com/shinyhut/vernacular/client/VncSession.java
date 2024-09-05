@@ -1,8 +1,8 @@
 package com.shinyhut.vernacular.client;
 
-import com.shinyhut.vernacular.protocol.messages.PixelFormat;
-import com.shinyhut.vernacular.protocol.messages.ProtocolVersion;
-import com.shinyhut.vernacular.protocol.messages.ServerInit;
+import com.shinyhut.vernacular.protocol.messages.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +26,14 @@ public class VncSession {
     private boolean receivedFramebufferUpdate = false;
     private final ReentrantLock framebufferUpdateLock = new ReentrantLock();
     private final Condition framebufferUpdatedCondition = framebufferUpdateLock.newCondition();
+
+    @Getter
+    @Setter
+    private Encoder messageEncoder;
+
+    @Getter
+    @Setter
+    private Decoder messageDecoder;
 
     public VncSession(VernacularConfig config, InputStream inputStream, OutputStream outputStream) {
         this.config = config;

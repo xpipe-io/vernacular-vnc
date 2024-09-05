@@ -28,8 +28,8 @@ public class ServerEventHandler {
         this.framebuffer = new Framebuffer(session);
     }
 
-    void start() {
-        PushbackInputStream in = new PushbackInputStream(session.getInputStream());
+    void start() throws IOException {
+        PushbackInputStream in = new PushbackInputStream(session.getMessageDecoder().getInputStream());
 
         running = true;
 

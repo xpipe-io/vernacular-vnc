@@ -146,7 +146,7 @@ public class ClientEventHandler {
     private void sendMessage(Encodable message) throws IOException {
         outputLock.lock();
         try {
-            message.encode(session.getOutputStream());
+            session.getMessageEncoder().encode(message);
         } finally {
             outputLock.unlock();
         }

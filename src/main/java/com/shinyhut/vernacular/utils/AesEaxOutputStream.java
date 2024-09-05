@@ -36,7 +36,7 @@ public class AesEaxOutputStream {
         cipher.init(true, new AEADParameters(new KeyParameter(key), 16 * 8, nonceBytes));
 
         var lengthBytes = Arrays.copyOfRange(ByteBuffer.allocate(4).putInt(b.length).array(), 2,4);
-        var out = new byte[1024];
+        var out = new byte[8192];
         cipher.processAADBytes(lengthBytes, 0, 2);
         var length = cipher.processBytes(b,0,b.length, out, 0);
         try {

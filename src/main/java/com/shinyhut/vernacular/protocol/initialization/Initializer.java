@@ -11,28 +11,21 @@ import com.shinyhut.vernacular.protocol.messages.SetEncodings;
 import com.shinyhut.vernacular.protocol.messages.SetPixelFormat;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.shinyhut.vernacular.protocol.messages.Encoding.COPYRECT;
-import static com.shinyhut.vernacular.protocol.messages.Encoding.CURSOR;
-import static com.shinyhut.vernacular.protocol.messages.Encoding.DESKTOP_SIZE;
-import static com.shinyhut.vernacular.protocol.messages.Encoding.EXTENDED_CLIPBOARD;
-import static com.shinyhut.vernacular.protocol.messages.Encoding.HEXTILE;
-import static com.shinyhut.vernacular.protocol.messages.Encoding.RAW;
-import static com.shinyhut.vernacular.protocol.messages.Encoding.RRE;
-import static com.shinyhut.vernacular.protocol.messages.Encoding.ZLIB;
+import static com.shinyhut.vernacular.protocol.messages.Encoding.*;
 
 public class Initializer {
 
     public void initialise(VncSession session) throws IOException {
-        OutputStream out = session.getOutputStream();
+        var encoder = session.getMessageEncoder();
+        var decoder = session.getMessageDecoder();
 
         ClientInit clientInit = new ClientInit(session.getConfig().isShared());
-        clientInit.encode(out);
+        encoder.encode(clientInit);
 
-        ServerInit serverInit = ServerInit.decode(session.getInputStream());
+        ServerInit serverInit = ServerInit.decode(decoder.getInputStream());
         session.setServerInit(serverInit);
         session.setFramebufferWidth(serverInit.getFramebufferWidth());
         session.setFramebufferHeight(serverInit.getFramebufferHeight());
@@ -85,8 +78,8 @@ public class Initializer {
 
         SetEncodings setEncodings = new SetEncodings(encodings);
 
-        setPixelFormat.encode(out);
-        setEncodings.encode(out);
+        encoder.encode(setPixelFormat);
+        encoder.encode(setEncodings);
 
         session.setPixelFormat(pixelFormat);
     }

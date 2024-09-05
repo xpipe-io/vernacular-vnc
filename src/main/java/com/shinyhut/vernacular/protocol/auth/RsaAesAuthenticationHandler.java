@@ -3,12 +3,13 @@ package com.shinyhut.vernacular.protocol.auth;
 import com.shinyhut.vernacular.client.VncSession;
 import com.shinyhut.vernacular.client.exceptions.SecurityTypeFailedException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
+import com.shinyhut.vernacular.protocol.messages.Decoder;
+import com.shinyhut.vernacular.protocol.messages.Encoder;
 import com.shinyhut.vernacular.protocol.messages.SecurityResult;
 import com.shinyhut.vernacular.utils.AesEaxInputStream;
 import com.shinyhut.vernacular.utils.AesEaxOutputStream;
 import com.shinyhut.vernacular.utils.ByteUtils;
 import com.shinyhut.vernacular.utils.CryptoUtils;
-import lombok.SneakyThrows;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -23,12 +24,11 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Arrays;
 
-import static com.shinyhut.vernacular.protocol.messages.SecurityType.RA2NE;
-
 public class RsaAesAuthenticationHandler implements SecurityHandler {
 
     private static final int MIN_KEY_LENGTH = 1024;
     private static final int MAX_KEY_LENGTH = 8192;
+    private final boolean encryptSession;
     private final int keySize;
     private final MessageDigest digest;
     private int subtype;
@@ -51,17 +51,36 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
     private final int authCode;
 
     public static RsaAesAuthenticationHandler RA2(int authCode) {
-        return new RsaAesAuthenticationHandler(128, CryptoUtils.sha1(), authCode);
+        return new RsaAesAuthenticationHandler(true, 128, CryptoUtils.sha1(), authCode);
     }
 
     public static RsaAesAuthenticationHandler RA2_256(int authCode) {
-        return new RsaAesAuthenticationHandler(256, CryptoUtils.sha256(), authCode);
+        return new RsaAesAuthenticationHandler(true, 256, CryptoUtils.sha256(), authCode);
     }
 
-    private RsaAesAuthenticationHandler(int keySize, MessageDigest digest, int authCode) {
+    public static RsaAesAuthenticationHandler RA2ne(int authCode) {
+        return new RsaAesAuthenticationHandler(false, 128, CryptoUtils.sha1(), authCode);
+    }
+
+    public static RsaAesAuthenticationHandler RA2ne_256(int authCode) {
+        return new RsaAesAuthenticationHandler(false, 256, CryptoUtils.sha256(), authCode);
+    }
+
+    private RsaAesAuthenticationHandler(boolean encryptSession, int keySize, MessageDigest digest, int authCode) {
+        this.encryptSession = encryptSession;
         this.keySize = keySize;
         this.digest = digest;
         this.authCode = authCode;
+    }
+
+    @Override
+    public Encoder getSessionEncoder(VncSession session) {
+        return encryptSession ? Encoder.ra2(encryptedOutput) : SecurityHandler.super.getSessionEncoder(session);
+    }
+
+    @Override
+    public Decoder getSessionDecoder(VncSession session) {
+        return encryptSession ? Decoder.ra2(encryptedInput) : SecurityHandler.super.getSessionDecoder(session);
     }
 
     @Override
@@ -87,7 +106,7 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
         readSubtype();
         writeCredentials();
 
-        return SecurityResult.decode(rawInput, session.getProtocolVersion());
+        return SecurityResult.decode(getSessionDecoder(session).getInputStream(), session.getProtocolVersion());
     }
 
     private void requestAuthentication() throws IOException {

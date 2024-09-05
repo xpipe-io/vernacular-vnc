@@ -29,7 +29,7 @@ public class AesEaxInputStream {
         nonce = nonce.add(BigInteger.ONE);
         cipher.init(false, new AEADParameters(new KeyParameter(key), 16 * 8, nonceBytes));
 
-        var out = new byte[1024];
+        var out = new byte[65536];
         var length = new DataInputStream(inputStream).readUnsignedShort();
         var lengthBytes = Arrays.copyOfRange(ByteBuffer.allocate(4).putInt(length).array(), 2, 4);
         var toRead = length + 16;
