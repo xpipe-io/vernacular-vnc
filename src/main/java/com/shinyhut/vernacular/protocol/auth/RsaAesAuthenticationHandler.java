@@ -280,8 +280,16 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
 
     private void writeCredentials() throws VncException, IOException {
         var pw = session.getConfig().getPasswordSupplier().get().getBytes(StandardCharsets.UTF_8);
-        var buf = ByteBuffer.allocate(1 + 1 + pw.length);
-        buf.put((byte) 0);
+        ByteBuffer buf;
+        if (subtype == 1) {
+            var user = session.getConfig().getUsernameSupplier().get().getBytes(StandardCharsets.UTF_8);
+            buf = ByteBuffer.allocate(1 + user.length + 1 + pw.length);
+            buf.put((byte) user.length);
+            buf.put(user);
+        } else {
+            buf = ByteBuffer.allocate(1 + 1 + pw.length);
+            buf.put((byte) 0);
+        }
         buf.put((byte) pw.length);
         buf.put(pw);
         encryptedOutput.write(buf.array());
