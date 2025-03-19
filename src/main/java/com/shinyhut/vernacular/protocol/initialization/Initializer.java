@@ -31,8 +31,18 @@ public class Initializer {
         session.setFramebufferHeight(serverInit.getFramebufferHeight());
 
         VernacularConfig config = session.getConfig();
-        ColorDepth colorDepth = config.getColorDepth();
 
+        ColorDepth colorDepth;
+        var depth = serverInit.getPixelFormat().getDepth();
+        if (depth == 8) {
+            colorDepth = serverInit.getPixelFormat().isTrueColor() ? ColorDepth.BPP_8_TRUE : ColorDepth.BPP_8_INDEXED;
+        } else if (depth == 16) {
+            colorDepth = ColorDepth.BPP_16_TRUE;
+        } else if (depth == 24) {
+            colorDepth = ColorDepth.BPP_24_TRUE;
+        } else {
+            colorDepth = ColorDepth.BPP_16_TRUE;
+        }
         PixelFormat pixelFormat = new PixelFormat(
                 colorDepth.getBitsPerPixel(),
                 colorDepth.getDepth(),
@@ -44,7 +54,7 @@ public class Initializer {
                 colorDepth.getRedShift(),
                 colorDepth.getGreenShift(),
                 colorDepth.getBlueShift());
-
+        
         SetPixelFormat setPixelFormat = new SetPixelFormat(pixelFormat);
 
         List<Encoding> encodings = new ArrayList<>();
