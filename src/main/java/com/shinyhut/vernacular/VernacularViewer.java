@@ -38,9 +38,6 @@ public class VernacularViewer extends JFrame {
     private JMenuItem connectMenuItem;
     private JMenuItem disconnectMenuItem;
 
-    private JMenuItem bpp8IndexedColorMenuItem;
-    private JMenuItem bpp16TrueColorMenuItem;
-    private JMenuItem bpp24TrueColorMenuItem;
     private JMenuItem localCursorMenuItem;
 
     private JMenu encodingsMenu;
@@ -212,7 +209,6 @@ public class VernacularViewer extends JFrame {
 
     private void initialiseVernacularClient() {
         config = new VernacularConfig();
-        config.setColorDepth(BPP_16_TRUE);
         config.setErrorListener(e -> {
             e.printStackTrace();
             showMessageDialog(this, e.getMessage(), "Error", ERROR_MESSAGE);
@@ -261,19 +257,6 @@ public class VernacularViewer extends JFrame {
         disconnectMenuItem.setEnabled(false);
         disconnectMenuItem.addActionListener(event -> disconnect());
 
-        ButtonGroup colorDepths = new ButtonGroup();
-
-        bpp8IndexedColorMenuItem = new JRadioButtonMenuItem("8-bit Indexed Color");
-        bpp16TrueColorMenuItem = new JRadioButtonMenuItem("16-bit True Color", true);
-        bpp24TrueColorMenuItem = new JRadioButtonMenuItem("24-bit True Color");
-        colorDepths.add(bpp8IndexedColorMenuItem);
-        colorDepths.add(bpp16TrueColorMenuItem);
-        colorDepths.add(bpp24TrueColorMenuItem);
-
-        bpp8IndexedColorMenuItem.addActionListener(event -> config.setColorDepth(BPP_8_INDEXED));
-        bpp16TrueColorMenuItem.addActionListener(event -> config.setColorDepth(BPP_16_TRUE));
-        bpp24TrueColorMenuItem.addActionListener(event -> config.setColorDepth(BPP_24_TRUE));
-
         localCursorMenuItem = new JCheckBoxMenuItem("Use Local Cursor", true);
         localCursorMenuItem.addActionListener(event -> config.setUseLocalMousePointer(localCursorMenuItem.isSelected()));
 
@@ -305,9 +288,6 @@ public class VernacularViewer extends JFrame {
         file.add(connectMenuItem);
         file.add(disconnectMenuItem);
         file.add(exit);
-        options.add(bpp8IndexedColorMenuItem);
-        options.add(bpp16TrueColorMenuItem);
-        options.add(bpp24TrueColorMenuItem);
         options.add(localCursorMenuItem);
         options.add(encodingsMenu);
         menu.add(file);
@@ -389,17 +369,11 @@ public class VernacularViewer extends JFrame {
         if (running) {
             connectMenuItem.setEnabled(false);
             disconnectMenuItem.setEnabled(true);
-            bpp8IndexedColorMenuItem.setEnabled(false);
-            bpp16TrueColorMenuItem.setEnabled(false);
-            bpp24TrueColorMenuItem.setEnabled(false);
             localCursorMenuItem.setEnabled(false);
             encodingsMenu.setEnabled(false);
         } else {
             connectMenuItem.setEnabled(true);
             disconnectMenuItem.setEnabled(false);
-            bpp8IndexedColorMenuItem.setEnabled(true);
-            bpp16TrueColorMenuItem.setEnabled(true);
-            bpp24TrueColorMenuItem.setEnabled(true);
             localCursorMenuItem.setEnabled(true);
             encodingsMenu.setEnabled(true);
         }

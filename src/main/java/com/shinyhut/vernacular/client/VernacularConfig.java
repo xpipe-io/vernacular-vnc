@@ -23,7 +23,6 @@ public class VernacularConfig {
     private MousePointerUpdateListener mousePointerUpdateListener;
     private boolean shared = true;
     private int targetFramesPerSecond = 30;
-    private ColorDepth colorDepth = BPP_8_INDEXED;
     private boolean useLocalMousePointer = false;
     private boolean enableCopyrectEncoding = true;
     private boolean enableExtendedClipboard = true;
@@ -165,23 +164,6 @@ public class VernacularConfig {
      */
     public void setTargetFramesPerSecond(int targetFramesPerSecond) {
         this.targetFramesPerSecond = targetFramesPerSecond;
-    }
-
-    public ColorDepth getColorDepth() {
-        return colorDepth;
-    }
-
-    /**
-     * Specifies the color depth to request from the remote server. Note that the greater the color depth, the more
-     * bandwidth we will consume.
-     * <p>
-     * Default: 8 bits per pixel
-     *
-     * @param colorDepth The color depth for rendering the remote desktop
-     * @see com.shinyhut.vernacular.client.rendering.ColorDepth ColorDepth
-     */
-    public void setColorDepth(ColorDepth colorDepth) {
-        this.colorDepth = colorDepth;
     }
 
     /**
