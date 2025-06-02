@@ -26,7 +26,7 @@ public class ClientCutTextCaps  implements Encodable {
         byte[] formatSizes = new byte[sizes.size() * 4];
         sizes.forEach((format, size) -> {
             flags[0] = flags[0] | format.code;
-            int startByte = format.ordinal();
+            int startByte = format.ordinal() * 4;
             byte[] sizeForCurrentFormat = ByteBuffer.allocate(4).putInt(size).array();
             System.arraycopy(sizeForCurrentFormat, 0, formatSizes, startByte, 4);
         });

@@ -5,6 +5,7 @@ import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.protocol.handshaking.Handshaker;
 import com.shinyhut.vernacular.protocol.initialization.Initializer;
 import com.shinyhut.vernacular.utils.KeySyms;
+import lombok.Getter;
 
 import java.awt.event.KeyEvent;
 import java.io.BufferedInputStream;
@@ -23,6 +24,7 @@ public class VernacularClient {
 
     private final VernacularConfig config;
 
+    @Getter
     private VncSession session;
     private ClientEventHandler clientEventHandler;
     private ServerEventHandler serverEventHandler;
