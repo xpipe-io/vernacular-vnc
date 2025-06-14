@@ -19,7 +19,7 @@ class ServerSecurityTypeTest extends Specification {
         def message = ServerSecurityType.decode(input)
 
         then:
-        message.securityType == securityType
+        message == securityType.code
 
         where:
         securityType << [NONE, VNC, MS_LOGON_2]

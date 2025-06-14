@@ -17,7 +17,7 @@ class ServerSecurityTypesTest extends Specification {
         def message = ServerSecurityTypes.decode(input)
 
         then:
-        message.securityTypes == [NONE, VNC, MS_LOGON_2]
+        message.securityTypes == [NONE.code, VNC.code, MS_LOGON_2.code]
     }
 
     def "should throw an exception if the response contains an error message"() {

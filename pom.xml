@@ -6,11 +6,11 @@
     <groupId>com.shinyhut</groupId>
     <artifactId>vernacular</artifactId>
     <packaging>jar</packaging>
-    <version>1.16</version>
+    <version>1.15</version>
 
     <name>vernacular</name>
     <description>A pure Java VNC client library and viewer application.</description>
-    <url>https://github.com/shinyhut/vernacular-vnc</url>
+    <url>https://github.com/xpipe-io/vernacular-vnc</url>
 
     <licenses>
         <license>
@@ -26,12 +26,18 @@
             <organization>ShinyHut Solutions Ltd</organization>
             <organizationUrl>http://www.shinyhut.com</organizationUrl>
         </developer>
+        <developer>
+            <name>Christopher Schnick</name>
+            <email>crschnick@xpipe.io</email>
+            <organization>XPipe UG (haftungsbeschränkt)</organization>
+            <organizationUrl>https://xpipe.io</organizationUrl>
+        </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/shinyhut/vernacular-vnc.git</connection>
-        <developerConnection>scm:git:ssh://github.com:shinyhut/vernacular-vnc.git</developerConnection>
-        <url>http://github.com/shinyhut/vernacular-vnc/tree/master</url>
+        <connection>scm:git:git://github.com/xpipe-io/vernacular-vnc.git</connection>
+        <developerConnection>scm:git:ssh://github.com:xpipe-io/vernacular-vnc.git</developerConnection>
+        <url>http://github.com/xpipe-io/vernacular-vnc/tree/master</url>
     </scm>
 
     <properties>
@@ -58,14 +64,12 @@
             <artifactId>bcprov-jdk18on</artifactId>
             <version>1.79</version>
         </dependency>
-
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.32</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>org.spockframework</groupId>
             <artifactId>spock-core</artifactId>
@@ -213,11 +217,11 @@
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
         </snapshotRepository>
         <repository>
             <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <url>https://s01.oss.sonatype.org/service/local/</url>
         </repository>
     </distributionManagement>
 
