@@ -101,4 +101,4 @@ public class VernacularDemo {
 }
 ```
 
-For a more realistic example, see [Vernacular Viewer](/blob/master/src/main/java/com/shinyhut/vernacular/VernacularViewer.java) in the source distribution, which demonstrates how to use Vernacular to build a working remote desktop application.
+For a more realistic example, see [Vernacular Viewer](/src/main/java/com/shinyhut/vernacular/VernacularViewer.java) in the source distribution, which demonstrates how to use Vernacular to build a working remote desktop application.
