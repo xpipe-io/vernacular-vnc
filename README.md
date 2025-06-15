@@ -67,8 +67,8 @@ public class VernacularDemo {
         // The 'image' parameter is a java.awt.Image containing a current snapshot of the remote desktop
         // Expect this event to be triggered several times per second
         config.setScreenUpdateListener(image -> {
-            int width = image.getWidth(null);
-            int height = image.getHeight(null);
+            int width = image.getWidth();
+            int height = image.getHeight();
             System.out.println(String.format("Received a %dx%d screen update", width, height));
         });
 
