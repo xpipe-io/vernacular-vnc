@@ -1,24 +1,20 @@
 # Vernacular VNC
-[![Latest release](https://img.shields.io/github/release/shinyhut/vernacular-vnc.svg)](https://github.com/shinyhut/vernacular-vnc/releases/latest)
-[![Build Status](https://app.travis-ci.com/shinyhut/vernacular-vnc.svg?branch=master)](https://app.travis-ci.com/shinyhut/vernacular-vnc)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Vernacular is a pure Java VNC remote desktop client library. Vernacular is open-source and
 released under the MIT license.
 
 ## Getting Started
 
-The latest releases are available for manual download from our [releases page](https://github.com/shinyhut/vernacular-vnc/releases).
-Vernacular is also available through Maven:
+Vernacular is available through Maven:
 
 ### Maven
 
 ```xml
 <dependencies>
     <dependency>
-        <groupId>com.shinyhut</groupId>
+        <groupId>io.xpipe</groupId>
         <artifactId>vernacular</artifactId>
-        <version>1.14</version>
+        <version>1.15</version>
     </dependency>
 </dependencies>
 ```
@@ -30,7 +26,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.shinyhut:vernacular:1.14'
+    compile 'io.xpipe:vernacular:1.15'
 }
 ```
 
@@ -52,9 +48,6 @@ public class VernacularDemo {
 
         VernacularConfig config = new VernacularConfig();
         VernacularClient client = new VernacularClient(config);
-
-        // Select 8-bits per pixel indexed color, or 8/16/24 bits per pixel true color
-        config.setColorDepth(ColorDepth.BPP_8_INDEXED);
 
         // Set up callbacks for the various events that can happen in a VNC session
 
@@ -108,4 +101,4 @@ public class VernacularDemo {
 }
 ```
 
-For a more realistic example, see [Vernacular Viewer](https://github.com/shinyhut/vernacular-vnc/blob/master/src/main/java/com/shinyhut/vernacular/VernacularViewer.java) in the source distribution, which demonstrates how to use Vernacular to build a working remote desktop application.
+For a more realistic example, see [Vernacular Viewer](/blob/master/src/main/java/com/shinyhut/vernacular/VernacularViewer.java) in the source distribution, which demonstrates how to use Vernacular to build a working remote desktop application.
