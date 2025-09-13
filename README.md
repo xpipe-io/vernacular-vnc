@@ -64,7 +64,7 @@ public class VernacularDemo {
         config.setRemoteClipboardListener(text -> System.out.println(String.format("Received copied text: %s", text)));
 
         // Receive screen updates from the remote host
-        // The 'image' parameter is a java.awt.Image containing a current snapshot of the remote desktop
+        // The 'image' parameter is a com.shinyhut.vernacular.client.rendering.ImageBuffer containing a current snapshot of the remote desktop
         // Expect this event to be triggered several times per second
         config.setScreenUpdateListener(image -> {
             int width = image.getWidth();
