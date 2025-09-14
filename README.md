@@ -64,11 +64,11 @@ public class VernacularDemo {
         config.setRemoteClipboardListener(text -> System.out.println(String.format("Received copied text: %s", text)));
 
         // Receive screen updates from the remote host
-        // The 'image' parameter is a java.awt.Image containing a current snapshot of the remote desktop
+        // The 'image' parameter is a com.shinyhut.vernacular.client.rendering.ImageBuffer containing a current snapshot of the remote desktop
         // Expect this event to be triggered several times per second
         config.setScreenUpdateListener(image -> {
-            int width = image.getWidth(null);
-            int height = image.getHeight(null);
+            int width = image.getWidth();
+            int height = image.getHeight();
             System.out.println(String.format("Received a %dx%d screen update", width, height));
         });
 
@@ -101,4 +101,4 @@ public class VernacularDemo {
 }
 ```
 
-For a more realistic example, see [Vernacular Viewer](/blob/master/src/main/java/com/shinyhut/vernacular/VernacularViewer.java) in the source distribution, which demonstrates how to use Vernacular to build a working remote desktop application.
+For a more realistic example, see [Vernacular Viewer](/src/main/java/com/shinyhut/vernacular/VernacularViewer.java) in the source distribution, which demonstrates how to use Vernacular to build a working remote desktop application.
