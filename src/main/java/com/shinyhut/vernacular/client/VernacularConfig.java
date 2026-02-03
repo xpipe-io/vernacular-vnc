@@ -4,6 +4,8 @@ import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.client.rendering.ColorDepth;
 import com.shinyhut.vernacular.protocol.messages.MessageHeaderFlags;
 import com.shinyhut.vernacular.client.rendering.ImageBuffer;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -21,6 +23,7 @@ public class VernacularConfig {
     private Consumer<Void> bellListener;
     private Consumer<String> remoteClipboardListener;
     private MousePointerUpdateListener mousePointerUpdateListener;
+    private ScreenResizeListener screenResizeListener;
     private boolean shared = true;
     private int targetFramesPerSecond = 30;
     private boolean useLocalMousePointer = false;
@@ -29,6 +32,11 @@ public class VernacularConfig {
     private boolean enableRreEncoding = true;
     private boolean enableHextileEncoding = true;
     private boolean enableZLibEncoding = false;
+
+    @Getter
+    @Setter
+    private boolean enableExtendedDesktopSize = false;
+
     private final Map<MessageHeaderFlags, Integer> maxSizePerFormat = new EnumMap<>(MessageHeaderFlags.class);
 
     public Supplier<String> getUsernameSupplier() {
@@ -83,6 +91,19 @@ public class VernacularConfig {
      */
     public void setScreenUpdateListener(Consumer<ImageBuffer> screenUpdateListener) {
         this.screenUpdateListener = screenUpdateListener;
+    }
+
+    public static interface ScreenResizeListener {
+
+        void update(int width, int height);
+    }
+
+    public void setScreenResizeListener(ScreenResizeListener screenResizeListener) {
+        this.screenResizeListener = screenResizeListener;
+    }
+
+    public ScreenResizeListener getScreenResizeListener() {
+        return screenResizeListener;
     }
 
     public static interface MousePointerUpdateListener {

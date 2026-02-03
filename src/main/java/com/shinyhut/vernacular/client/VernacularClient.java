@@ -139,6 +139,20 @@ public class VernacularClient {
         }
     }
 
+    public void resize(int width, int height) {
+        if (!config.isEnableExtendedDesktopSize()) {
+            return;
+        }
+
+        if (clientEventHandler != null) {
+            try {
+                clientEventHandler.resize(width, height);
+            } catch (IOException e) {
+                handleError(new UnexpectedVncException(e));
+            }
+        }
+    }
+
     /**
      * 'Clicks' (presses and releases) the specified mouse button.
      * <p>

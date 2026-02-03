@@ -109,6 +109,7 @@ public class VernacularViewer extends JFrame {
         addMenu();
         addMouseListeners();
         addKeyListener();
+        addSizeListeners();
         addDrawingSurface();
         initialiseVernacularClient();
         clipboardMonitor.start();
@@ -138,6 +139,15 @@ public class VernacularViewer extends JFrame {
                 if (connected()) {
                     client.handleKeyEvent(e);
                 }
+            }
+        });
+    }
+
+    private void addSizeListeners() {
+        getContentPane().addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                client.resize(getWidth(), getHeight());
             }
         });
     }
@@ -222,6 +232,10 @@ public class VernacularViewer extends JFrame {
         config.setMousePointerUpdateListener((x, y, imageBuffer) -> {
             this.setCursor(getDefaultToolkit().createCustomCursor(bufferToImage(imageBuffer), new Point(x, y), "vnc"));
         });
+        config.setEnableExtendedDesktopSize(true);
+        config.setScreenResizeListener((width, height) -> {
+            this.setSize(width, height);
+        });
         config.setBellListener(v -> getDefaultToolkit().beep());
         config.setRemoteClipboardListener(t -> getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(t), null));
         config.setUseLocalMousePointer(localCursorMenuItem.isSelected());
@@ -299,7 +313,7 @@ public class VernacularViewer extends JFrame {
         JPanel connectDialog = new JPanel();
         JTextField hostField = new JTextField("localhost", 20);
         hostField.addAncestorListener(focusRequester);
-        JTextField portField = new JTextField("60782", 5);
+        JTextField portField = new JTextField("49732", 5);
         JLabel hostLabel = new JLabel("Host");
         hostLabel.setLabelFor(hostField);
         JLabel portLabel = new JLabel("Port");

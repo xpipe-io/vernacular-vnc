@@ -2,13 +2,7 @@ package com.shinyhut.vernacular.client;
 
 import com.shinyhut.vernacular.client.exceptions.UnexpectedVncException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
-import com.shinyhut.vernacular.protocol.messages.ClientCutText;
-import com.shinyhut.vernacular.protocol.messages.ClientCutTextCaps;
-import com.shinyhut.vernacular.protocol.messages.ClientCutTextExtendedClipboard;
-import com.shinyhut.vernacular.protocol.messages.Encodable;
-import com.shinyhut.vernacular.protocol.messages.FramebufferUpdateRequest;
-import com.shinyhut.vernacular.protocol.messages.KeyEvent;
-import com.shinyhut.vernacular.protocol.messages.PointerEvent;
+import com.shinyhut.vernacular.protocol.messages.*;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -113,6 +107,12 @@ public class ClientEventHandler {
             ClientCutText message = new ClientCutText(text);
             sendMessage(message);
         }
+    }
+
+    void resize(int width, int height) throws IOException {
+        var screens = List.of(new Screen(0, 0, 0, width, height));
+        var message = new SetDesktopSize(width, height, screens);
+        sendMessage(message);
     }
 
     private void updateMouseStatus() throws IOException {

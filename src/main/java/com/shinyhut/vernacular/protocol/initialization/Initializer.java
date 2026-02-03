@@ -79,6 +79,10 @@ public class Initializer {
             encodings.add(EXTENDED_CLIPBOARD);
         }
 
+        if (config.isEnableExtendedDesktopSize()) {
+            encodings.add(EXTENDED_DESKTOP_SIZE);
+        }
+
         encodings.add(RAW);
         encodings.add(DESKTOP_SIZE);
 

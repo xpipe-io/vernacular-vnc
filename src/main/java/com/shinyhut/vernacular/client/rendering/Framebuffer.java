@@ -48,6 +48,8 @@ public class Framebuffer {
                     resizeFramebuffer(rectangle);
                 } else if (rectangle.getEncoding() == CURSOR) {
                     updateCursor(rectangle, in);
+                } else if (rectangle.getEncoding() == EXTENDED_DESKTOP_SIZE) {
+                    updateExtendedDesktopSize(rectangle, in);
                 } else {
                     renderers.get(rectangle.getEncoding()).render(in, frame, rectangle);
                 }
@@ -77,11 +79,12 @@ public class Framebuffer {
         int height = newSize.getHeight();
         session.setFramebufferWidth(width);
         session.setFramebufferHeight(height);
-        var resized = new ImageBuffer(width, height, false);
-        frame = resized;
-//        BufferedImage resized = new BufferedImage(width, height, TYPE_INT_RGB);
-//        resized.getGraphics().drawImage(frame, 0, 0, null);
-//        frame = resized;
+        frame = new ImageBuffer(width, height, false);
+
+        VernacularConfig.ScreenResizeListener listener = session.getConfig().getScreenResizeListener();
+        if (listener != null) {
+            listener.update(width, height);
+        }
     }
 
     private void updateCursor(Rectangle cursor, InputStream in) throws VncException {
@@ -95,4 +98,25 @@ public class Framebuffer {
         }
     }
 
+    private void updateExtendedDesktopSize(Rectangle rect, InputStream in) throws VncException {
+        try {
+            // Read screen data but don't use it
+            int screens = in.read();
+            in.readNBytes(3 + (screens * 16));
+
+            int width = rect.getWidth();
+            int height = rect.getHeight();
+
+            session.setFramebufferWidth(width);
+            session.setFramebufferHeight(height);
+            frame = new ImageBuffer(width, height, false);
+
+            VernacularConfig.ScreenResizeListener listener = session.getConfig().getScreenResizeListener();
+            if (listener != null) {
+                listener.update(width, height);
+            }
+        } catch (IOException e) {
+            throw new UnexpectedVncException(e);
+        }
+    }
 }
