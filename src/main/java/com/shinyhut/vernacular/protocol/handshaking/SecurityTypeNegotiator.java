@@ -30,10 +30,6 @@ public class SecurityTypeNegotiator {
     private static SecurityHandler resolve(List<Integer> securityTypes) throws  VncException {
         if (securityTypes.contains(NONE.getCode())) {
             return new NoSecurityHandler();
-        } else if (securityTypes.contains(VNC.getCode())) {
-            return new VncAuthenticationHandler();
-        } else if (securityTypes.contains(MS_LOGON_2.getCode())) {
-            return new MsLogon2AuthenticationHandler();
         } else if (securityTypes.contains(RA2NE.getCode())) {
             return RsaAesAuthenticationHandler.RA2ne(RA2NE.getCode());
         } else if (securityTypes.contains(RA2NE_256.getCode())) {
@@ -42,6 +38,10 @@ public class SecurityTypeNegotiator {
             return RsaAesAuthenticationHandler.RA2(RA2.getCode());
         } else if (securityTypes.contains(RA2_256.getCode())) {
             return RsaAesAuthenticationHandler.RA2_256(RA2_256.getCode());
+        } else if (securityTypes.contains(VNC.getCode())) {
+            return new VncAuthenticationHandler();
+        } else if (securityTypes.contains(MS_LOGON_2.getCode())) {
+            return new MsLogon2AuthenticationHandler();
         } else {
             throw new NoSupportedSecurityTypesException(securityTypes, Arrays.asList(SecurityType.values()));
         }
