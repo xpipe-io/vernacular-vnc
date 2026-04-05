@@ -85,11 +85,6 @@ public class Framebuffer {
         session.setFramebufferWidth(width);
         session.setFramebufferHeight(height);
         frame = new ImageBuffer(width, height, false);
-
-        VernacularConfig.ScreenResizeListener listener = session.getConfig().getScreenResizeListener();
-        if (listener != null) {
-            listener.update(width, height);
-        }
     }
 
     private void updateCursor(Rectangle cursor, InputStream in) throws VncException {
@@ -115,11 +110,6 @@ public class Framebuffer {
             session.setFramebufferWidth(width);
             session.setFramebufferHeight(height);
             frame = new ImageBuffer(width, height, false);
-
-            VernacularConfig.ScreenResizeListener listener = session.getConfig().getScreenResizeListener();
-            if (listener != null) {
-                listener.update(width, height);
-            }
         } catch (IOException e) {
             throw new UnexpectedVncException(e);
         }

@@ -234,9 +234,6 @@ public class VernacularViewer extends JFrame {
             this.setCursor(getDefaultToolkit().createCustomCursor(bufferToImage(imageBuffer), new Point(x, y), "vnc"));
         });
         config.setEnableExtendedDesktopSize(true);
-        config.setScreenResizeListener((width, height) -> {
-            resizeContent(width, height);
-        });
         config.setBellListener(v -> getDefaultToolkit().beep());
         config.setRemoteClipboardListener(t -> getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(t), null));
         config.setUseLocalMousePointer(localCursorMenuItem.isSelected());
@@ -400,7 +397,7 @@ public class VernacularViewer extends JFrame {
 
     private void renderFrame(Image frame) {
         if (resizeRequired(frame)) {
-            resizeContent(frame.getWidth(null), frame.getHeight(null));
+            setContentSize(frame.getWidth(null), frame.getHeight(null));
         }
         lastFrame = frame;
         repaint();
@@ -408,23 +405,6 @@ public class VernacularViewer extends JFrame {
 
     private boolean resizeRequired(Image frame) {
         return lastFrame == null || lastFrame.getWidth(null) != frame.getWidth(null) || lastFrame.getHeight(null) != frame.getHeight(null);
-    }
-
-    private void resizeContent(int remoteWidth, int remoteHeight) {
-        Rectangle screenSize = getLocalGraphicsEnvironment().getMaximumWindowBounds();
-        int paddingTop = getHeight() - getContentPane().getHeight();
-        int paddingSides = getWidth() - getContentPane().getWidth();
-        int maxWidth = (int) screenSize.getWidth() - paddingSides;
-        int maxHeight = (int) screenSize.getHeight() - paddingTop;
-        if (remoteWidth <= maxWidth && remoteHeight < maxHeight) {
-            setContentSize(remoteWidth, remoteHeight);
-        } else {
-            double scale = min((double) maxWidth / remoteWidth, (double) maxHeight / remoteHeight);
-            int scaledWidth = (int) (remoteWidth * scale);
-            int scaledHeight = (int) (remoteHeight * scale);
-            setContentSize(scaledWidth, scaledHeight);
-        }
-        setLocationRelativeTo(null);
     }
 
     private void setContentSize(int width, int height) {

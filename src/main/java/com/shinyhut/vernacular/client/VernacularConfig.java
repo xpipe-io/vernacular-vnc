@@ -23,7 +23,6 @@ public class VernacularConfig {
     private Consumer<Void> bellListener;
     private Consumer<String> remoteClipboardListener;
     private MousePointerUpdateListener mousePointerUpdateListener;
-    private ScreenResizeListener screenResizeListener;
     private boolean shared = true;
     private int targetFramesPerSecond = 30;
     private boolean useLocalMousePointer = false;
@@ -91,19 +90,6 @@ public class VernacularConfig {
      */
     public void setScreenUpdateListener(Consumer<ImageBuffer> screenUpdateListener) {
         this.screenUpdateListener = screenUpdateListener;
-    }
-
-    public static interface ScreenResizeListener {
-
-        void update(int width, int height);
-    }
-
-    public void setScreenResizeListener(ScreenResizeListener screenResizeListener) {
-        this.screenResizeListener = screenResizeListener;
-    }
-
-    public ScreenResizeListener getScreenResizeListener() {
-        return screenResizeListener;
     }
 
     public static interface MousePointerUpdateListener {
