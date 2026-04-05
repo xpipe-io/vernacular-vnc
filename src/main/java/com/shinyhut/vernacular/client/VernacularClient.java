@@ -144,6 +144,14 @@ public class VernacularClient {
             return;
         }
 
+        if (session.getFramebufferWidth() == width && session.getFramebufferHeight() == height) {
+            return;
+        }
+
+        if (session == null || !session.isReceivedExtendedDesktopSize()) {
+            return;
+        }
+
         if (clientEventHandler != null) {
             try {
                 clientEventHandler.resize(width, height);

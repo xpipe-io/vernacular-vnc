@@ -42,6 +42,7 @@ public class Framebuffer {
     public void processUpdate(FramebufferUpdate update) throws VncException {
         try {
             var in = session.getMessageDecoder().getInputStream();
+            var desktopSizeChanged = false;
             for (int i = 0; i < update.getNumberOfRectangles(); i++) {
                 Rectangle rectangle = Rectangle.decode(in);
                 if (rectangle.getEncoding() == DESKTOP_SIZE) {
@@ -50,12 +51,16 @@ public class Framebuffer {
                     updateCursor(rectangle, in);
                 } else if (rectangle.getEncoding() == EXTENDED_DESKTOP_SIZE) {
                     updateExtendedDesktopSize(rectangle, in);
+                    desktopSizeChanged = true;
                 } else {
                     renderers.get(rectangle.getEncoding()).render(in, frame, rectangle);
                 }
             }
             paint();
             session.framebufferUpdated();
+            if (desktopSizeChanged) {
+                session.setReceivedExtendedDesktopSize(true);
+            }
         } catch (IOException e) {
             throw new UnexpectedVncException(e);
         }

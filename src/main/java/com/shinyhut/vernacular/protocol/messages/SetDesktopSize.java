@@ -22,7 +22,7 @@ public class SetDesktopSize implements Encodable {
     public void encode(OutputStream out) throws IOException {
         DataOutput dataOutput = new DataOutputStream(out);
         dataOutput.writeByte(251);
-        dataOutput.writeShort(0);
+        dataOutput.writeByte(0);
         dataOutput.writeShort(width);
         dataOutput.writeShort(height);
         dataOutput.writeByte(screens.size());

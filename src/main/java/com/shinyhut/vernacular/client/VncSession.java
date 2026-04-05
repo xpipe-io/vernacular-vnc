@@ -24,6 +24,9 @@ public class VncSession {
     private volatile int framebufferHeight;
 
     private boolean receivedFramebufferUpdate = false;
+    @Getter
+    @Setter
+    private boolean receivedExtendedDesktopSize = false;
     private final ReentrantLock framebufferUpdateLock = new ReentrantLock();
     private final Condition framebufferUpdatedCondition = framebufferUpdateLock.newCondition();
 

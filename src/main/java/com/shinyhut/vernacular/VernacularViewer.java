@@ -13,7 +13,6 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 
-import static com.shinyhut.vernacular.client.rendering.ColorDepth.*;
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.Color.*;
 import static java.awt.Cursor.getDefaultCursor;
@@ -147,7 +146,9 @@ public class VernacularViewer extends JFrame {
         getContentPane().addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                client.resize(getWidth(), getHeight());
+                if (connected()) {
+                    client.resize(getContentPane().getWidth(), getContentPane().getHeight());
+                }
             }
         });
     }
@@ -234,7 +235,7 @@ public class VernacularViewer extends JFrame {
         });
         config.setEnableExtendedDesktopSize(true);
         config.setScreenResizeListener((width, height) -> {
-            this.setSize(width, height);
+            resizeContent(width, height);
         });
         config.setBellListener(v -> getDefaultToolkit().beep());
         config.setRemoteClipboardListener(t -> getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(t), null));
@@ -311,9 +312,9 @@ public class VernacularViewer extends JFrame {
 
     private void showConnectDialog() {
         JPanel connectDialog = new JPanel();
-        JTextField hostField = new JTextField("localhost", 20);
+        JTextField hostField = new JTextField("192.168.1.103", 20);
         hostField.addAncestorListener(focusRequester);
-        JTextField portField = new JTextField("49732", 5);
+        JTextField portField = new JTextField("5900", 5);
         JLabel hostLabel = new JLabel("Host");
         hostLabel.setLabelFor(hostField);
         JLabel portLabel = new JLabel("Port");
@@ -399,7 +400,7 @@ public class VernacularViewer extends JFrame {
 
     private void renderFrame(Image frame) {
         if (resizeRequired(frame)) {
-            resizeWindow(frame);
+            resizeContent(frame.getWidth(null), frame.getHeight(null));
         }
         lastFrame = frame;
         repaint();
@@ -409,26 +410,24 @@ public class VernacularViewer extends JFrame {
         return lastFrame == null || lastFrame.getWidth(null) != frame.getWidth(null) || lastFrame.getHeight(null) != frame.getHeight(null);
     }
 
-    private void resizeWindow(Image frame) {
-        int remoteWidth = frame.getWidth(null);
-        int remoteHeight = frame.getHeight(null);
+    private void resizeContent(int remoteWidth, int remoteHeight) {
         Rectangle screenSize = getLocalGraphicsEnvironment().getMaximumWindowBounds();
         int paddingTop = getHeight() - getContentPane().getHeight();
         int paddingSides = getWidth() - getContentPane().getWidth();
         int maxWidth = (int) screenSize.getWidth() - paddingSides;
         int maxHeight = (int) screenSize.getHeight() - paddingTop;
         if (remoteWidth <= maxWidth && remoteHeight < maxHeight) {
-            setWindowSize(remoteWidth, remoteHeight);
+            setContentSize(remoteWidth, remoteHeight);
         } else {
             double scale = min((double) maxWidth / remoteWidth, (double) maxHeight / remoteHeight);
             int scaledWidth = (int) (remoteWidth * scale);
             int scaledHeight = (int) (remoteHeight * scale);
-            setWindowSize(scaledWidth, scaledHeight);
+            setContentSize(scaledWidth, scaledHeight);
         }
         setLocationRelativeTo(null);
     }
 
-    private void setWindowSize(int width, int height) {
+    private void setContentSize(int width, int height) {
         getContentPane().setPreferredSize(new Dimension(width, height));
         pack();
     }
