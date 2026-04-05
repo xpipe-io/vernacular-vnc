@@ -38,10 +38,12 @@ public class SecurityTypeNegotiator {
             return RsaAesAuthenticationHandler.RA2(RA2.getCode());
         } else if (securityTypes.contains(RA2_256.getCode())) {
             return RsaAesAuthenticationHandler.RA2_256(RA2_256.getCode());
-        } else if (securityTypes.contains(VNC.getCode())) {
-            return new VncAuthenticationHandler();
         } else if (securityTypes.contains(MS_LOGON_2.getCode())) {
             return new MsLogon2AuthenticationHandler();
+        } else if (securityTypes.contains(DH.getCode())) {
+            return new DhAuthenticationHandler();
+        } else if (securityTypes.contains(VNC.getCode())) {
+            return new VncAuthenticationHandler();
         } else {
             throw new NoSupportedSecurityTypesException(securityTypes, Arrays.asList(SecurityType.values()));
         }
