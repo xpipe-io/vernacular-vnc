@@ -25,6 +25,12 @@ public class RawRenderer implements Renderer {
     }
 
     void render(InputStream in, ImageBuffer destination, int x, int y, int width, int height) throws VncException {
+        // This shouldn't happen, but apparently can with desktop resizes
+        var oob = destination.getWidth() < x + width || destination.getHeight() < y + height;
+        if (oob) {
+            return;
+        }
+
         try {
             int sx = x;
             int sy = y;
