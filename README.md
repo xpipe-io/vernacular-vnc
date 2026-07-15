@@ -14,7 +14,7 @@ Vernacular is available through Maven:
     <dependency>
         <groupId>io.xpipe</groupId>
         <artifactId>vernacular</artifactId>
-        <version>1.18</version>
+        <version>1.19</version>
     </dependency>
 </dependencies>
 ```
@@ -26,7 +26,7 @@ repositories {
 }
 
 dependencies {
-    compile 'io.xpipe:vernacular:1.18'
+    compile 'io.xpipe:vernacular:1.19'
 }
 ```
 

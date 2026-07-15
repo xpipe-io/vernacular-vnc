@@ -82,9 +82,12 @@ public class Framebuffer {
     private void resizeFramebuffer(Rectangle newSize) {
         int width = newSize.getWidth();
         int height = newSize.getHeight();
-        session.setFramebufferWidth(width);
-        session.setFramebufferHeight(height);
-        frame = new ImageBuffer(width, height, false);
+        var changed = session.getFramebufferWidth() != width || session.getFramebufferHeight() != height;
+        if  (changed) {
+            session.setFramebufferWidth(width);
+            session.setFramebufferHeight(height);
+            frame = new ImageBuffer(width, height, false);
+        }
     }
 
     private void updateCursor(Rectangle cursor, InputStream in) throws VncException {
@@ -103,13 +106,7 @@ public class Framebuffer {
             // Read screen data but don't use it
             int screens = in.read();
             in.readNBytes(3 + (screens * 16));
-
-            int width = rect.getWidth();
-            int height = rect.getHeight();
-
-            session.setFramebufferWidth(width);
-            session.setFramebufferHeight(height);
-            frame = new ImageBuffer(width, height, false);
+            resizeFramebuffer(rect);
         } catch (IOException e) {
             throw new UnexpectedVncException(e);
         }
