@@ -2,6 +2,7 @@ package com.shinyhut.vernacular.protocol.auth;
 
 import com.shinyhut.vernacular.client.VncSession;
 import com.shinyhut.vernacular.client.exceptions.AuthenticationRequiredException;
+import com.shinyhut.vernacular.client.exceptions.SecurityTypeFailedException;
 import com.shinyhut.vernacular.client.exceptions.UnexpectedVncException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.protocol.messages.SecurityResult;
@@ -91,8 +92,12 @@ public class MsLogon2AuthenticationHandler implements SecurityHandler {
         return padLeft(sharedKey.toByteArray(), 8);
     }
 
-    public void sendEncrypted(OutputStream out, String value, int length, byte[] key) throws GeneralSecurityException, IOException {
-        byte[] bytes = padRight(value.getBytes(ISO_8859_1), length);
+    public void sendEncrypted(OutputStream out, String value, int length, byte[] key) throws GeneralSecurityException, IOException, VncException {
+        byte[] valueBytes = value.getBytes(ISO_8859_1);
+        if (valueBytes.length > length) {
+            throw new SecurityTypeFailedException("Credentials can't be longer than " + length + " bytes");
+        }
+        byte[] bytes = padRight(valueBytes, length);
         byte[] encrypted = des(bytes, key);
         out.write(encrypted);
     }

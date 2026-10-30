@@ -285,10 +285,17 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
     }
 
     private void writeCredentials() throws VncException, IOException {
+        // The credential lengths are sent as a single byte
         var pw = session.getConfig().getPasswordSupplier().get().getBytes(StandardCharsets.UTF_8);
+        if (pw.length > 255) {
+            throw new SecurityTypeFailedException("Password can't be longer than 255 bytes");
+        }
         ByteBuffer buf;
         if (subtype == 1) {
             var user = session.getConfig().getUsernameSupplier().get().getBytes(StandardCharsets.UTF_8);
+            if (user.length > 255) {
+                throw new SecurityTypeFailedException("Username can't be longer than 255 bytes");
+            }
             buf = ByteBuffer.allocate(1 + user.length + 1 + pw.length);
             buf.put((byte) user.length);
             buf.put(user);

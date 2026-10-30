@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 import static java.util.Collections.synchronizedList;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static java.util.stream.IntStream.range;
 
@@ -127,13 +127,13 @@ public class ClientEventHandler {
     }
 
     private boolean timeForFramebufferUpdate() {
-        long updateInterval = MILLISECONDS.toNanos(1000 / session.getConfig().getTargetFramesPerSecond());
+        long updateInterval = SECONDS.toNanos(1) / session.getConfig().getTargetFramesPerSecond();
         return lastFramebufferUpdateRequestTime == null ||
                 System.nanoTime() - lastFramebufferUpdateRequestTime > updateInterval;
     }
 
     private void waitUntilFramebufferUpdateTime() throws InterruptedException {
-        long updateInterval = MILLISECONDS.toNanos(1000 / session.getConfig().getTargetFramesPerSecond());
+        long updateInterval = SECONDS.toNanos(1) / session.getConfig().getTargetFramesPerSecond();
         long timeToWait = lastFramebufferUpdateRequestTime + updateInterval - System.nanoTime();
         if (timeToWait > 0L) {
             Thread.sleep(NANOSECONDS.toMillis(timeToWait), (int) (timeToWait % 1_000_000));

@@ -130,6 +130,10 @@ public class VernacularClient {
      * @param pressed Is the mouse button currently 'pressed'?
      */
     public void updateMouseButton(int button, boolean pressed) {
+        if (button < 1 || button > 8) {
+            throw new IllegalArgumentException("Mouse button must be between 1 and 8, but was " + button);
+        }
+
         if (clientEventHandler != null) {
             try {
                 clientEventHandler.updateMouseButton(button, pressed);

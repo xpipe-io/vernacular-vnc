@@ -183,8 +183,12 @@ public class VernacularConfig {
      * Default: 30
      *
      * @param targetFramesPerSecond The number of frames per second we want to receive from the remote server
+     * @throws IllegalArgumentException if the number of frames per second is less than 1
      */
     public void setTargetFramesPerSecond(int targetFramesPerSecond) {
+        if (targetFramesPerSecond < 1) {
+            throw new IllegalArgumentException("Target frames per second must be at least 1, but was " + targetFramesPerSecond);
+        }
         this.targetFramesPerSecond = targetFramesPerSecond;
     }
 

@@ -2,6 +2,7 @@ package com.shinyhut.vernacular.protocol.auth
 
 import com.shinyhut.vernacular.client.VernacularConfig
 import com.shinyhut.vernacular.client.VncSession
+import com.shinyhut.vernacular.client.exceptions.SecurityTypeFailedException
 import com.shinyhut.vernacular.protocol.messages.ProtocolVersion
 import spock.lang.Specification
 import spock.lang.Subject
@@ -86,5 +87,13 @@ class MsLogon2AuthenticationHandlerTest extends Specification {
         ] as byte[]
 
         result.success
+    }
+
+    def "should reject credentials longer than the field size"() {
+        when:
+        handler.sendEncrypted(new ByteArrayOutputStream(), 'a' * 65, 64, new byte[8])
+
+        then:
+        thrown(SecurityTypeFailedException)
     }
 }

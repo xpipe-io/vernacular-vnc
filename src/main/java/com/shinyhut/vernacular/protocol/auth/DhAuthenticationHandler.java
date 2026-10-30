@@ -99,8 +99,12 @@ public class DhAuthenticationHandler implements SecurityHandler {
         out.write(DH.getCode());
     }
 
-    public void sendEncrypted(OutputStream out, String value, int length, byte[] key) throws GeneralSecurityException, IOException {
-        byte[] bytes = padRight(value.getBytes(UTF_8), length);
+    public void sendEncrypted(OutputStream out, String value, int length, byte[] key) throws GeneralSecurityException, IOException, VncException {
+        byte[] valueBytes = value.getBytes(UTF_8);
+        if (valueBytes.length > length) {
+            throw new SecurityTypeFailedException("Credentials can't be longer than " + length + " bytes");
+        }
+        byte[] bytes = padRight(valueBytes, length);
         byte[] encrypted = des(bytes, key);
         out.write(encrypted);
     }
