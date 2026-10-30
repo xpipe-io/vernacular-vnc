@@ -30,7 +30,7 @@ public class SecurityResult {
         DataInputStream dataInput = new DataInputStream(in);
         int resultCode = dataInput.readInt();
         SecurityResult result;
-        if (resultCode == 1) {
+        if (resultCode != 0) {
             if (version.atLeast(3, 8)) {
                 ErrorMessage errorMessage = ErrorMessage.decode(in);
                 result = new SecurityResult(false, errorMessage.getMessage());

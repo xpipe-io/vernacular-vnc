@@ -149,7 +149,13 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
         digest.update(serverKeyN);
         digest.update(serverKeyE);
         var f = digest.digest();
-        //TODO: verify digest with format string %02x-%02x-%02x-%02x-%02x-%02x-%02x-%02x
+        var fingerprint = String.format("%02x-%02x-%02x-%02x-%02x-%02x-%02x-%02x",
+                f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7]);
+
+        var verifier = session.getConfig().getServerKeyVerifier();
+        if (verifier != null && !verifier.verify(fingerprint, serverKey)) {
+            throw new SecurityTypeFailedException("Server key was rejected");
+        }
     }
 
     private void writePublicKey() throws VncException, IOException {

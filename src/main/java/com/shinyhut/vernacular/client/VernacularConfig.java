@@ -7,6 +7,7 @@ import com.shinyhut.vernacular.client.rendering.ImageBuffer;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.security.PublicKey;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -23,6 +24,7 @@ public class VernacularConfig {
     private Consumer<Void> bellListener;
     private Consumer<String> remoteClipboardListener;
     private MousePointerUpdateListener mousePointerUpdateListener;
+    private ServerKeyVerifier serverKeyVerifier;
     private boolean shared = true;
     private int targetFramesPerSecond = 30;
     private boolean useLocalMousePointer = false;
@@ -110,6 +112,19 @@ public class VernacularConfig {
      */
     public void setMousePointerUpdateListener(MousePointerUpdateListener mousePointerUpdateListener) {
         this.mousePointerUpdateListener = mousePointerUpdateListener;
+    }
+
+    public static interface ServerKeyVerifier {
+
+        boolean verify(String fingerprint, PublicKey serverKey);
+    }
+
+    public ServerKeyVerifier getServerKeyVerifier() {
+        return serverKeyVerifier;
+    }
+
+    public void setServerKeyVerifier(ServerKeyVerifier serverKeyVerifier) {
+        this.serverKeyVerifier = serverKeyVerifier;
     }
 
     public Consumer<String> getRemoteClipboardListener() {

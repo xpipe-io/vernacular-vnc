@@ -39,4 +39,17 @@ class SecurityResultTest extends Specification {
         !result.success
         result.errorMessage == 'Fail!'
     }
+
+    def "should treat any non-zero result code as an authentication failure"() {
+        given:
+        def input = new ByteArrayInputStream(
+                ([0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x08] + ('Too many'.getBytes('US-ASCII') as List)) as byte[])
+
+        when:
+        def result = SecurityResult.decode(input, new ProtocolVersion(3, 8))
+
+        then:
+        !result.success
+        result.errorMessage == 'Too many'
+    }
 }

@@ -3,6 +3,7 @@ package com.shinyhut.vernacular.protocol.handshaking
 import com.shinyhut.vernacular.client.VncSession
 import com.shinyhut.vernacular.protocol.auth.MsLogon2AuthenticationHandler
 import com.shinyhut.vernacular.protocol.auth.NoSecurityHandler
+import com.shinyhut.vernacular.protocol.auth.RsaAesAuthenticationHandler
 import com.shinyhut.vernacular.protocol.auth.VncAuthenticationHandler
 import com.shinyhut.vernacular.protocol.messages.ProtocolVersion
 import spock.lang.Specification
@@ -38,6 +39,30 @@ class SecurityTypeNegotiatorTest extends Specification {
         [VNC]                   | VncAuthenticationHandler
         [VNC, MS_LOGON_2]       | VncAuthenticationHandler
         [MS_LOGON_2]            | MsLogon2AuthenticationHandler
+    }
+
+    def "should prefer encrypted RSA-AES security types over unencrypted ones"() {
+        given:
+        def message = [serverTypes.size()]
+        serverTypes.each { message += it.code }
+        def bytes = new ByteArrayInputStream(message as byte[])
+        def session = Mock(VncSession)
+        _ * session.protocolVersion >> new ProtocolVersion(3, 8)
+
+        when:
+        def handler = negotiator.negotiate(session)
+
+        then:
+        1 * session.inputStream >> bytes
+        handler.class == RsaAesAuthenticationHandler
+        handler.authCode == selected.code
+
+        where:
+        serverTypes                       | selected
+        [RA2NE, RA2NE_256, RA2, RA2_256]  | RA2_256
+        [RA2NE, RA2NE_256, RA2]           | RA2
+        [RA2NE, RA2NE_256]                | RA2NE_256
+        [RA2NE, VNC]                      | RA2NE
     }
 
     def "for protocol version 3.3, must accept whatever security type is selected by the server"() {

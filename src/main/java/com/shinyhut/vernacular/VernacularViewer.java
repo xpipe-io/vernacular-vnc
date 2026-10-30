@@ -12,6 +12,7 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.security.PublicKey;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.Color.*;
@@ -227,6 +228,7 @@ public class VernacularViewer extends JFrame {
         });
         config.setUsernameSupplier(this::showUsernameDialog);
         config.setPasswordSupplier(this::showPasswordDialog);
+        config.setServerKeyVerifier(this::showServerKeyDialog);
         config.setScreenUpdateListener(imageBuffer -> {
             renderFrame(bufferToImage(imageBuffer));
         });
@@ -362,6 +364,14 @@ public class VernacularViewer extends JFrame {
             password = new String(passwordField.getPassword());
         }
         return password;
+    }
+
+    private boolean showServerKeyDialog(String fingerprint, PublicKey serverKey) {
+        String message = "The server has provided the following identifying information:\n" +
+                "Fingerprint: " + fingerprint + "\n" +
+                "Please verify that the information is correct and press \"Yes\". Otherwise press \"No\"";
+        int choice = showConfirmDialog(this, message, "Server Identity", YES_NO_OPTION);
+        return choice == YES_OPTION;
     }
 
     private void connect(String host, int port) {

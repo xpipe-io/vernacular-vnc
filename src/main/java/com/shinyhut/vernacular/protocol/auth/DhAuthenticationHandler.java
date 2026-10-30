@@ -2,6 +2,7 @@ package com.shinyhut.vernacular.protocol.auth;
 
 import com.shinyhut.vernacular.client.VncSession;
 import com.shinyhut.vernacular.client.exceptions.AuthenticationRequiredException;
+import com.shinyhut.vernacular.client.exceptions.SecurityTypeFailedException;
 import com.shinyhut.vernacular.client.exceptions.UnexpectedVncException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.protocol.messages.SecurityResult;
@@ -26,9 +27,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static javax.crypto.Cipher.ENCRYPT_MODE;
 
 public class DhAuthenticationHandler implements SecurityHandler {
-
-    private static final long DH_KEY_MAX_BITS = 31;
-    private static final long MAX_DH_KEY_VALUE = 1L << DH_KEY_MAX_BITS;
 
     private final Random random;
 
@@ -74,7 +72,13 @@ public class DhAuthenticationHandler implements SecurityHandler {
             BigInteger generator = BigInteger.valueOf(generatorValue);
             BigInteger modulus = new BigInteger(1, modulusBytes);
             BigInteger serverPublicKey = new BigInteger(1, serverPublicKeyBytes);
-            BigInteger clientPrivateKey = BigInteger.valueOf(random.nextLong() % MAX_DH_KEY_VALUE);
+            if (modulus.bitLength() < 2) {
+                throw new SecurityTypeFailedException("Server DH modulus is invalid");
+            }
+            BigInteger clientPrivateKey;
+            do {
+                clientPrivateKey = new BigInteger(modulus.bitLength() - 1, random);
+            } while (clientPrivateKey.signum() == 0);
             BigInteger clientPublicKey = generator.modPow(clientPrivateKey, modulus);
             BigInteger sharedKey = serverPublicKey.modPow(clientPrivateKey, modulus);
 
