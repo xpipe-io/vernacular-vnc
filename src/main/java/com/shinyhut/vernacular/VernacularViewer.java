@@ -245,11 +245,8 @@ public class VernacularViewer extends JFrame {
     private BufferedImage bufferToImage(ImageBuffer buffer) {
         var img = new BufferedImage(buffer.getWidth(), buffer.getHeight(),buffer.isAlpha() ?
                 BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB);
-        for (int x = 0; x < buffer.getWidth(); x++) {
-            for (int y = 0; y < buffer.getHeight(); y++) {
-                img.setRGB(x,y, buffer.get(x, y));
-            }
-        }
+        // The buffer is stored row by row, so it can be copied in one call
+        img.setRGB(0, 0, buffer.getWidth(), buffer.getHeight(), buffer.getBuffer(), 0, buffer.getWidth());
         return img;
     }
 

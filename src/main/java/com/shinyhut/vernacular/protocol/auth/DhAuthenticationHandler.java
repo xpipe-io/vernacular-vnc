@@ -105,11 +105,11 @@ public class DhAuthenticationHandler implements SecurityHandler {
             throw new SecurityTypeFailedException("Credentials can't be longer than " + length + " bytes");
         }
         byte[] bytes = padRight(valueBytes, length);
-        byte[] encrypted = des(bytes, key);
+        byte[] encrypted = aes(bytes, key);
         out.write(encrypted);
     }
 
-    public byte[] des(byte[] data, byte[] key) throws GeneralSecurityException {
+    public byte[] aes(byte[] data, byte[] key) throws GeneralSecurityException {
         Cipher aes = Cipher.getInstance("AES/ECB/NoPadding");
         SecretKeySpec keySpec = new SecretKeySpec(key, 0, key.length, "AES");
         aes.init(ENCRYPT_MODE, keySpec);
