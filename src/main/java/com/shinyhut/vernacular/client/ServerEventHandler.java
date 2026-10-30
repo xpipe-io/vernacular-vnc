@@ -9,6 +9,7 @@ import com.shinyhut.vernacular.protocol.messages.FramebufferUpdate;
 import com.shinyhut.vernacular.protocol.messages.ServerCutText;
 import com.shinyhut.vernacular.protocol.messages.SetColorMapEntries;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.PushbackInputStream;
 import java.util.function.Consumer;
@@ -66,7 +67,11 @@ public class ServerEventHandler {
                             throw new UnknownMessageTypeException(messageType);
                     }
                 }
-            } catch (IOException e) {
+
+                if (running) {
+                    errorHandler.accept(new UnexpectedVncException(new EOFException("Connection closed by server")));
+                }
+            } catch (IOException | RuntimeException e) {
                 if (running) {
                     errorHandler.accept(new UnexpectedVncException(e));
                 }
@@ -85,7 +90,8 @@ public class ServerEventHandler {
     void stop() {
         running = false;
         try {
-            if (eventLoop != null) {
+            // stop() can be called from the event loop itself via the error handler
+            if (eventLoop != null && eventLoop != Thread.currentThread()) {
                 eventLoop.join(1000);
             }
         } catch (InterruptedException ignored) {

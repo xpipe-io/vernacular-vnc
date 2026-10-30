@@ -34,6 +34,9 @@ public class AesEaxInputStream {
         var lengthBytes = Arrays.copyOfRange(ByteBuffer.allocate(4).putInt(length).array(), 2, 4);
         var toRead = length + 16;
         var read = inputStream.readNBytes(toRead);
+        if (read.length < toRead) {
+            throw new EOFException();
+        }
         cipher.processAADBytes(lengthBytes, 0, 2);
         var outIndex = cipher.processBytes(read, 0, toRead, out,0);
         try {

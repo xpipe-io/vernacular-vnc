@@ -144,11 +144,11 @@ public class VernacularClient {
             return;
         }
 
-        if (session.getFramebufferWidth() == width && session.getFramebufferHeight() == height) {
+        if (session == null || !session.isReceivedExtendedDesktopSize()) {
             return;
         }
 
-        if (session == null || !session.isReceivedExtendedDesktopSize()) {
+        if (session.getFramebufferWidth() == width && session.getFramebufferHeight() == height) {
             return;
         }
 
