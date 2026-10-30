@@ -1,11 +1,13 @@
 package com.shinyhut.vernacular.protocol.messages;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
+import java.util.Comparator;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ClientCutTextCaps  implements Encodable {
 
@@ -17,27 +19,31 @@ public class ClientCutTextCaps  implements Encodable {
 
     @Override
     public void encode(OutputStream out) throws IOException {
-        int[] flags = new int[]{ MessageHeaderFlags.CAPS.code
+        int flags = MessageHeaderFlags.CAPS.code
                 | MessageHeaderFlags.NOTIFY.code | MessageHeaderFlags.PEEK.code
                 | MessageHeaderFlags.PROVIDE.code
-                | MessageHeaderFlags.REQUEST.code
-        };
+                | MessageHeaderFlags.REQUEST.code;
 
-        byte[] formatSizes = new byte[sizes.size() * 4];
-        sizes.forEach((format, size) -> {
-            flags[0] = flags[0] | format.code;
-            int startByte = format.ordinal() * 4;
-            byte[] sizeForCurrentFormat = ByteBuffer.allocate(4).putInt(size).array();
-            System.arraycopy(sizeForCurrentFormat, 0, formatSizes, startByte, 4);
-        });
+        // There is one size entry for each format flag set, ordered by the format bits.
+        // Only the lower 16 bits are formats, the others are actions which have no size
+        var formatSizes = new ByteArrayOutputStream();
+        var formatSizesOutput = new DataOutputStream(formatSizes);
+        var formats = sizes.keySet().stream()
+                .filter(format -> format.code < (1 << 16))
+                .sorted(Comparator.comparingInt(format -> format.code))
+                .collect(Collectors.toList());
+        for (var format : formats) {
+            flags |= format.code;
+            formatSizesOutput.writeInt(sizes.get(format));
+        }
 
         DataOutput dataOutput = new DataOutputStream(out);
 
         dataOutput.writeByte(0x06);
         dataOutput.write(new byte[3]);
 
-        dataOutput.writeInt(formatSizes.length + 4);
-        dataOutput.writeInt(flags[0]);
-        dataOutput.write(formatSizes);
+        dataOutput.writeInt(formatSizes.size() + 4);
+        dataOutput.writeInt(flags);
+        dataOutput.write(formatSizes.toByteArray());
     }
 }
