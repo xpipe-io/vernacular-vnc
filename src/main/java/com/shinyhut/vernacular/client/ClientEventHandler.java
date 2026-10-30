@@ -6,6 +6,7 @@ import com.shinyhut.vernacular.protocol.messages.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -16,6 +17,8 @@ import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static java.util.stream.IntStream.range;
 
 public class ClientEventHandler {
+
+    private static final int DEFAULT_MAX_TEXT_SIZE = 20 * 1024 * 1024;
 
     private final VncSession session;
     private final Consumer<VncException> errorHandler;
@@ -96,12 +99,12 @@ public class ClientEventHandler {
     void handleExtendedClipboardCaps() throws IOException {
         session.setReceivedExtendedClipboardCaps(true);
 
-        // Sending our own caps is optional. Without them, the server assumes that we accept text up to 20 MiB,
-        // so only send them if sizes are configured, as empty caps would indicate that we accept no formats
-        var maxSizePerFormat = session.getConfig().getMaxSizePerFormat();
-        if (!maxSizePerFormat.isEmpty()) {
-            sendMessage(new ClientCutTextCaps(maxSizePerFormat));
-        }
+        // Sending our own caps is optional, but without them the server assumes that we also support the notify and
+        // request actions, which we don't handle. The server could then only notify us about clipboard changes, and
+        // we would never receive the text. Text is always included, with the default size of 20 MiB if not configured
+        var maxSizePerFormat = new EnumMap<>(session.getConfig().getMaxSizePerFormat());
+        maxSizePerFormat.putIfAbsent(MessageHeaderFlags.TEXT, DEFAULT_MAX_TEXT_SIZE);
+        sendMessage(new ClientCutTextCaps(maxSizePerFormat));
     }
 
     void copyText(String text) throws IOException {

@@ -31,10 +31,17 @@ class ClientEventHandlerTest extends Specification {
         handler.handleExtendedClipboardCaps()
         handler.copyText('test')
 
-        then: "no caps are sent back by default, only the extended format text"
+        then: "our caps are sent first, then the extended format text"
         def bytes = output.toByteArray()
-        bytes[0] == 0x06
-        bytes[4] < 0 // negative length indicates the extended format
-        bytes[8..11] == [0x10, 0x00, 0x00, 0x01] as byte[] // flags = provide, text
+        bytes[0..15] == [
+                0x06, // message type
+                0x00, 0x00, 0x00, // padding
+                0x00, 0x00, 0x00, 0x08, // length = flags + 1 size
+                0x11, 0x00, 0x00, 0x01, // flags = caps, provide, text
+                0x01, 0x40, 0x00, 0x00 // text size = 20 MiB
+        ] as byte[]
+        bytes[16] == 0x06
+        bytes[20] < 0 // negative length indicates the extended format
+        bytes[24..27] == [0x10, 0x00, 0x00, 0x01] as byte[] // flags = provide, text
     }
 }

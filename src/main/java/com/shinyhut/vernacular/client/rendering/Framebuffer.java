@@ -9,6 +9,7 @@ import com.shinyhut.vernacular.client.rendering.renderers.*;
 import com.shinyhut.vernacular.protocol.messages.*;
 import com.shinyhut.vernacular.protocol.messages.Rectangle;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -109,8 +110,9 @@ public class Framebuffer {
     private void updateExtendedDesktopSize(Rectangle rect, InputStream in) throws VncException {
         try {
             // Read screen data but don't use it
-            int screens = in.read();
-            in.readNBytes(3 + (screens * 16));
+            var dataInput = new DataInputStream(in);
+            int screens = dataInput.readUnsignedByte();
+            dataInput.readFully(new byte[3 + (screens * 16)]);
             resizeFramebuffer(rect);
         } catch (IOException e) {
             throw new UnexpectedVncException(e);
