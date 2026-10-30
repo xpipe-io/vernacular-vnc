@@ -93,11 +93,21 @@ public class ClientEventHandler {
         sendMessage(message);
     }
 
+    void sendClientCutTextCaps() throws IOException {
+        ClientCutTextCaps clientCutTextCaps = new ClientCutTextCaps(session.getConfig().getMaxSizePerFormat());
+        sendMessage(clientCutTextCaps);
+    }
+
     void copyText(String text) throws IOException {
-        // Always use the original format, as servers like TigerVNC only make the text available to applications
-        // if it is sent in this format, or announced with an extended clipboard notify and then requested
-        ClientCutText message = new ClientCutText(text);
-        sendMessage(message);
+        if (session.getConfig().isEnableExtendedClipboard()) {
+            sendClientCutTextCaps();
+
+            ClientCutTextExtendedClipboard clientCutTextExtendedClipboard = new ClientCutTextExtendedClipboard(text);
+            sendMessage(clientCutTextExtendedClipboard);
+        } else {
+            ClientCutText message = new ClientCutText(text);
+            sendMessage(message);
+        }
     }
 
     void resize(int width, int height) throws IOException {
