@@ -78,8 +78,15 @@ public class VernacularViewer extends JFrame {
                         lastText = text;
                     }
                 }
-                sleep(100L);
             } catch (Exception ignored) {
+                // E.g. if the clipboard does not contain text or is currently unavailable
+            }
+
+            // Always wait, otherwise a failing clipboard access would be retried in a busy loop
+            try {
+                sleep(100L);
+            } catch (InterruptedException e) {
+                return;
             }
         }
     });

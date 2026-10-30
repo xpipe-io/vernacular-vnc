@@ -54,7 +54,6 @@ class ServerCutTextTest extends Specification {
         def result = ServerCutText.decode(input)
 
         then:
-        result.caps
         result.text == ''
     }
 

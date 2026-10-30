@@ -18,16 +18,14 @@ public class ServerEventHandler {
 
     private final VncSession session;
     private final Consumer<VncException> errorHandler;
-    private final ClientEventHandler clientEventHandler;
     private final Framebuffer framebuffer;
 
     private volatile boolean running;
     private Thread eventLoop;
 
-    ServerEventHandler(VncSession session, Consumer<VncException> errorHandler, ClientEventHandler clientEventHandler) {
+    ServerEventHandler(VncSession session, Consumer<VncException> errorHandler) {
         this.session = session;
         this.errorHandler = errorHandler;
-        this.clientEventHandler = clientEventHandler;
         this.framebuffer = new Framebuffer(session);
     }
 
@@ -60,10 +58,6 @@ public class ServerEventHandler {
                             break;
                         case 0x03:
                             ServerCutText cutText = ServerCutText.decode(in);
-                            if (cutText.isCaps()) {
-                                clientEventHandler.handleExtendedClipboardCaps();
-                                break;
-                            }
                             Consumer<String> cutTextListener = session.getConfig().getRemoteClipboardListener();
                             if (cutTextListener != null && !cutText.getText().isEmpty()) {
                                 cutTextListener.accept(cutText.getText());

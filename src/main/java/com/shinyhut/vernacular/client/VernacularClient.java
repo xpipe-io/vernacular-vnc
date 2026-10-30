@@ -73,7 +73,7 @@ public class VernacularClient {
         try {
             createSession(socket);
             clientEventHandler = new ClientEventHandler(session, this::handleError);
-            serverEventHandler = new ServerEventHandler(session, this::handleError, clientEventHandler);
+            serverEventHandler = new ServerEventHandler(session, this::handleError);
 
             serverEventHandler.start();
             clientEventHandler.start();

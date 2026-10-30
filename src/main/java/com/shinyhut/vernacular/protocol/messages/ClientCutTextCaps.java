@@ -19,8 +19,10 @@ public class ClientCutTextCaps  implements Encodable {
 
     @Override
     public void encode(OutputStream out) throws IOException {
-        // Only provide is supported, so the server has to send the clipboard data directly instead of notifying us
-        int flags = MessageHeaderFlags.CAPS.code | MessageHeaderFlags.PROVIDE.code;
+        int flags = MessageHeaderFlags.CAPS.code
+                | MessageHeaderFlags.NOTIFY.code | MessageHeaderFlags.PEEK.code
+                | MessageHeaderFlags.PROVIDE.code
+                | MessageHeaderFlags.REQUEST.code;
 
         // There is one size entry for each format flag set, ordered by the format bits.
         // Only the lower 16 bits are formats, the others are actions which have no size
