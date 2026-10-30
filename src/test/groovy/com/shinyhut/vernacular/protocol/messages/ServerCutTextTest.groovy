@@ -1,5 +1,6 @@
 package com.shinyhut.vernacular.protocol.messages
 
+import com.shinyhut.vernacular.client.exceptions.InvalidMessageException
 import spock.lang.Specification
 
 class ServerCutTextTest extends Specification {
@@ -37,5 +38,51 @@ class ServerCutTextTest extends Specification {
 
         then:
         result.text == 'test'
+    }
+
+    def "should reject an extended format message too short to contain flags"() {
+        given:
+        def input = new ByteArrayInputStream([
+                0x03, // message type
+                0x00, 0x00, 0x00, // padding
+                -0x01, -0x01, -0x01, -0x02, // data length = -2
+                0x00, 0x00
+        ] as byte[])
+
+        when:
+        ServerCutText.decode(input)
+
+        then:
+        thrown(InvalidMessageException)
+    }
+
+    def "should ignore an extended format message which does not provide text"() {
+        given:
+        def input = new ByteArrayInputStream([
+                0x03, // message type
+                0x00, 0x00, 0x00, // padding
+                -0x01, -0x01, -0x01, -0x05, // data length = -5
+                0x10, 0x00, 0x00, 0x04,  // flags = provide html
+                0x00
+        ] as byte[])
+
+        when:
+        def result = ServerCutText.decode(input)
+
+        then:
+        result.text == ''
+    }
+
+    def "should decode large extended format text encoded by the client"() {
+        given:
+        def text = 'äöü test ' * 500_000
+        def output = new ByteArrayOutputStream()
+        new ClientCutTextExtendedClipboard(text).encode(output)
+
+        when:
+        def result = ServerCutText.decode(new ByteArrayInputStream(output.toByteArray()))
+
+        then:
+        result.text == text
     }
 }

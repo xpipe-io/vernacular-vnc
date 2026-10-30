@@ -1,14 +1,14 @@
 package com.shinyhut.vernacular.protocol.messages;
 
+import com.shinyhut.vernacular.client.exceptions.InvalidMessageException;
+import com.shinyhut.vernacular.client.exceptions.VncException;
+
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.zip.DataFormatException;
-import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 
 public class ServerCutText {
 
@@ -22,13 +22,17 @@ public class ServerCutText {
         return text;
     }
 
-    public static ServerCutText decode(InputStream in) throws IOException {
+    public static ServerCutText decode(InputStream in) throws IOException, VncException {
         DataInputStream dataInput = new DataInputStream(in);
         dataInput.readFully(new byte[4]);
 
         int textLength = dataInput.readInt();
 
         if (textLength < 0) {
+            // The extended format data has to contain at least the flags
+            if (textLength == Integer.MIN_VALUE || -textLength < 4) {
+                throw new InvalidMessageException("ServerCutText");
+            }
             return decodeExtendedMessageFormat(dataInput, -textLength);
         }
 
@@ -42,36 +46,38 @@ public class ServerCutText {
         return new ServerCutText(text);
     }
 
-    private static ServerCutText decodeExtendedMessageFormat(DataInputStream dataInput, Integer textLength) throws IOException {
-        Charset charset = StandardCharsets.UTF_8;
-
+    private static ServerCutText decodeExtendedMessageFormat(DataInputStream dataInput, Integer textLength) throws IOException, VncException {
         int flags = dataInput.readInt();
 
-        byte[] textBytes = new byte[textLength - 4];
-        dataInput.readFully(textBytes);
+        byte[] data = new byte[textLength - 4];
+        dataInput.readFully(data);
 
         if ((flags & MessageHeaderFlags.CAPS.code) != 0) {
             return new ServerCutText("");
         }
 
-        if ((flags & MessageHeaderFlags.PROVIDE.code) != 0) {
-            Inflater inflater = new Inflater();
-
-            inflater.setInput(textBytes, 0, textBytes.length);
-            byte[] result = new byte[20 * 1024 * 1024];
-            try {
-                inflater.inflate(result);
-            } catch (DataFormatException e) {
-                throw new RuntimeException(e);
-            } finally {
-                inflater.end();
-            }
-            int length = new BigInteger(Arrays.copyOfRange(result, 0, 4)).intValue();
-            String text = new String(result, 4, length - 1, charset);
-            return new ServerCutText(text);
+        // Text is always the first format in the data if present, so other formats can be ignored
+        if ((flags & MessageHeaderFlags.PROVIDE.code) == 0 || (flags & MessageHeaderFlags.TEXT.code) == 0) {
+            return new ServerCutText("");
         }
 
-        return new ServerCutText("");
+        // Decompress only as much as is needed instead of allocating a fixed size buffer
+        try (var inflated = new DataInputStream(new InflaterInputStream(new ByteArrayInputStream(data)))) {
+            int length = inflated.readInt();
+            if (length < 0) {
+                throw new InvalidMessageException("ServerCutText");
+            }
+
+            // Reads in chunks, so an invalid large length does not allocate a large buffer upfront
+            byte[] textBytes = inflated.readNBytes(length);
+            if (textBytes.length != length) {
+                throw new InvalidMessageException("ServerCutText");
+            }
+
+            // The text is null terminated
+            int textEnd = length > 0 && textBytes[length - 1] == 0 ? length - 1 : length;
+            return new ServerCutText(new String(textBytes, 0, textEnd, StandardCharsets.UTF_8));
+        }
     }
 
 }
