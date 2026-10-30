@@ -1,6 +1,7 @@
 package com.shinyhut.vernacular.protocol.auth;
 
 import com.shinyhut.vernacular.client.VncSession;
+import com.shinyhut.vernacular.client.exceptions.AuthenticationRequiredException;
 import com.shinyhut.vernacular.client.exceptions.SecurityTypeFailedException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.protocol.messages.Decoder;
@@ -85,6 +86,10 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
 
     @Override
     public SecurityResult authenticate(VncSession session) throws VncException, IOException {
+        if (session.getConfig().getPasswordSupplier() == null) {
+            throw new AuthenticationRequiredException();
+        }
+
         this.session = session;
         rawInput = session.getInputStream();
         rawOutput = session.getOutputStream();
@@ -292,6 +297,9 @@ public class RsaAesAuthenticationHandler implements SecurityHandler {
         }
         ByteBuffer buf;
         if (subtype == 1) {
+            if (session.getConfig().getUsernameSupplier() == null) {
+                throw new AuthenticationRequiredException();
+            }
             var user = session.getConfig().getUsernameSupplier().get().getBytes(StandardCharsets.UTF_8);
             if (user.length > 255) {
                 throw new SecurityTypeFailedException("Username can't be longer than 255 bytes");

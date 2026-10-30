@@ -18,6 +18,28 @@ class VernacularClientTest extends Specification {
         button << [0, 9, -1]
     }
 
+    def "should stop and report the error if starting fails with an unexpected exception"() {
+        given:
+        def errors = []
+        def config = new VernacularConfig()
+        config.errorListener = { errors << it }
+        def client = new VernacularClient(config)
+        def socket = new Socket() {
+            @Override
+            InputStream getInputStream() {
+                throw new IllegalStateException("test")
+            }
+        }
+
+        when:
+        client.start(socket)
+
+        then:
+        !client.running
+        errors.size() == 1
+        errors[0].cause instanceof IllegalStateException
+    }
+
     def "should reject a target frame rate below 1"() {
         when:
         new VernacularConfig().targetFramesPerSecond = fps

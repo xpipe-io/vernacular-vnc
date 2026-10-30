@@ -77,7 +77,8 @@ public class VernacularClient {
 
             serverEventHandler.start();
             clientEventHandler.start();
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException e) {
+            // Any failure has to stop the client, otherwise it would be left half-started with an open socket
             handleError(new UnexpectedVncException(e));
         } catch (VncException e) {
             handleError(e);

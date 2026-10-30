@@ -89,6 +89,9 @@ public class ServerEventHandler {
 
     void stop() {
         running = false;
+        // The event loop is usually blocked reading from the connection, so close it to end the loop immediately.
+        // As running is already false, the resulting exception is not reported as an error
+        session.kill();
         try {
             // stop() can be called from the event loop itself via the error handler
             if (eventLoop != null && eventLoop != Thread.currentThread()) {

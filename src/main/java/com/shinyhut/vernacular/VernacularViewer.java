@@ -178,16 +178,22 @@ public class VernacularViewer extends JFrame {
         getContentPane().addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (connected()) {
+                if (connected() && isStandardButton(e)) {
                     client.updateMouseButton(e.getButton(), true);
                 }
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (connected()) {
+                if (connected() && isStandardButton(e)) {
                     client.updateMouseButton(e.getButton(), false);
                 }
+            }
+
+            // Only left, middle and right have the same numbers in AWT and VNC. In VNC, buttons 4 and 5 are the scroll
+            // wheel, while in AWT they are extra buttons like back and forward, which VNC can't represent
+            private boolean isStandardButton(MouseEvent e) {
+                return e.getButton() >= MouseEvent.BUTTON1 && e.getButton() <= MouseEvent.BUTTON3;
             }
         });
         getContentPane().addMouseWheelListener(e -> {
