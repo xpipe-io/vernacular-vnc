@@ -19,6 +19,9 @@ import java.util.Arrays;
 
 public class AesEaxOutputStream {
 
+    private static final int MAX_MESSAGE_SIZE = 0xFFFF;
+    private static final int MAC_SIZE = 16;
+
     private final byte[] key;
     private final EAXBlockCipher cipher;
     private final OutputStream outputStream;
@@ -31,14 +34,21 @@ public class AesEaxOutputStream {
     }
 
     public void write(byte[] b) throws IOException {
+        // The message length field only has 2 bytes, so larger data has to be split up into multiple messages
+        for (int offset = 0; offset < b.length; offset += MAX_MESSAGE_SIZE) {
+            writeMessage(b, offset, Math.min(MAX_MESSAGE_SIZE, b.length - offset));
+        }
+    }
+
+    private void writeMessage(byte[] b, int offset, int size) throws IOException {
         var nonceBytes = ByteUtils.bigIntToBytes(nonce,16, true);
         nonce = nonce.add(BigInteger.ONE);
         cipher.init(true, new AEADParameters(new KeyParameter(key), 16 * 8, nonceBytes));
 
-        var lengthBytes = Arrays.copyOfRange(ByteBuffer.allocate(4).putInt(b.length).array(), 2,4);
-        var out = new byte[8192];
+        var lengthBytes = Arrays.copyOfRange(ByteBuffer.allocate(4).putInt(size).array(), 2,4);
+        var out = new byte[size + MAC_SIZE];
         cipher.processAADBytes(lengthBytes, 0, 2);
-        var length = cipher.processBytes(b,0,b.length, out, 0);
+        var length = cipher.processBytes(b, offset, size, out, 0);
         try {
             length += cipher.doFinal(out, length);
         } catch (InvalidCipherTextException e) {
