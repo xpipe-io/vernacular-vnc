@@ -5,15 +5,14 @@ import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.protocol.messages.*;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
-import static java.time.LocalDateTime.now;
-import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.Collections.synchronizedList;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static java.util.stream.IntStream.range;
 
 public class ClientEventHandler {
@@ -29,7 +28,8 @@ public class ClientEventHandler {
     private int mouseX;
     private int mouseY;
 
-    private LocalDateTime lastFramebufferUpdateRequestTime;
+    // Monotonic System.nanoTime() value, unaffected by wall clock changes. Null if no update has been requested yet
+    private Long lastFramebufferUpdateRequestTime;
 
     ClientEventHandler(VncSession session, Consumer<VncException> errorHandler) {
         this.session = session;
@@ -52,7 +52,7 @@ public class ClientEventHandler {
                         waitUntilFramebufferUpdateTime();
                     }
                 }
-            } catch (IOException e) {
+            } catch (IOException | RuntimeException e) {
                 if (running) {
                     errorHandler.accept(new UnexpectedVncException(e));
                 }
@@ -68,7 +68,8 @@ public class ClientEventHandler {
     void stop() {
         running = false;
         try {
-            if (framebufferUpdateLoop != null) {
+            // stop() can be called from the update loop itself via the error handler
+            if (framebufferUpdateLoop != null && framebufferUpdateLoop != Thread.currentThread()) {
                 framebufferUpdateLoop.interrupt();
                 framebufferUpdateLoop.join(1000);
             }
@@ -121,17 +122,16 @@ public class ClientEventHandler {
     }
 
     private boolean timeForFramebufferUpdate() {
-        long updateInterval = 1000 / session.getConfig().getTargetFramesPerSecond();
+        long updateInterval = MILLISECONDS.toNanos(1000 / session.getConfig().getTargetFramesPerSecond());
         return lastFramebufferUpdateRequestTime == null ||
-                now().isAfter(lastFramebufferUpdateRequestTime.plus(updateInterval, MILLIS));
+                System.nanoTime() - lastFramebufferUpdateRequestTime > updateInterval;
     }
 
     private void waitUntilFramebufferUpdateTime() throws InterruptedException {
-        long updateInterval = 1000 / session.getConfig().getTargetFramesPerSecond();
-        LocalDateTime nextUpdate = lastFramebufferUpdateRequestTime.plus(updateInterval, MILLIS);
-        long timeToWait = now().until(nextUpdate, MILLIS);
+        long updateInterval = MILLISECONDS.toNanos(1000 / session.getConfig().getTargetFramesPerSecond());
+        long timeToWait = lastFramebufferUpdateRequestTime + updateInterval - System.nanoTime();
         if (timeToWait > 0L) {
-            Thread.sleep(timeToWait);
+            Thread.sleep(NANOSECONDS.toMillis(timeToWait), (int) (timeToWait % 1_000_000));
         }
     }
 
@@ -140,7 +140,7 @@ public class ClientEventHandler {
         int height = session.getFramebufferHeight();
         FramebufferUpdateRequest updateRequest = new FramebufferUpdateRequest(incremental, 0, 0, width, height);
         sendMessage(updateRequest);
-        lastFramebufferUpdateRequestTime = now();
+        lastFramebufferUpdateRequestTime = System.nanoTime();
     }
 
     private void sendMessage(Encodable message) throws IOException {
