@@ -38,4 +38,17 @@ class PixelDecoderTest extends Specification {
         result.green == 8
         result.blue == 12
     }
+
+    def "should throw an EOFException if the stream ends within a pixel"() {
+        given:
+        def decoder = new PixelDecoder([:])
+        def pixelFormat = new PixelFormat(16, 16, true, true, 31, 63, 31, 11, 5, 0)
+        def input = new ByteArrayInputStream([0xff] as byte[])
+
+        when:
+        decoder.decode(input, pixelFormat)
+
+        then:
+        thrown(EOFException)
+    }
 }

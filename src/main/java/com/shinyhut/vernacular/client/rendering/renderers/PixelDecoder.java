@@ -3,6 +3,7 @@ package com.shinyhut.vernacular.client.rendering.renderers;
 import com.shinyhut.vernacular.protocol.messages.ColorMapEntry;
 import com.shinyhut.vernacular.protocol.messages.PixelFormat;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -23,8 +24,12 @@ public class PixelDecoder {
         long value = 0L;
 
         for (int i = 0; i < bytesToRead; i++) {
+            int b = in.read();
+            if (b == -1) {
+                throw new EOFException();
+            }
             value <<= 8;
-            value |= in.read();
+            value |= b;
         }
 
         int red;
