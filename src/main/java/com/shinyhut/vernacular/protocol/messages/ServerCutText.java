@@ -13,13 +13,23 @@ import java.util.zip.InflaterInputStream;
 public class ServerCutText {
 
     private final String text;
+    private final boolean caps;
 
     public ServerCutText(String text) {
+        this(text, false);
+    }
+
+    private ServerCutText(String text, boolean caps) {
         this.text = text;
+        this.caps = caps;
     }
 
     public String getText() {
         return text;
+    }
+
+    public boolean isCaps() {
+        return caps;
     }
 
     public static ServerCutText decode(InputStream in) throws IOException, VncException {
@@ -53,7 +63,7 @@ public class ServerCutText {
         dataInput.readFully(data);
 
         if ((flags & MessageHeaderFlags.CAPS.code) != 0) {
-            return new ServerCutText("");
+            return new ServerCutText("", true);
         }
 
         // Text is always the first format in the data if present, so other formats can be ignored

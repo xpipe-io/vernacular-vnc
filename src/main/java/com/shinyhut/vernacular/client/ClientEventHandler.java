@@ -93,15 +93,20 @@ public class ClientEventHandler {
         sendMessage(message);
     }
 
-    void sendClientCutTextCaps() throws IOException {
-        ClientCutTextCaps clientCutTextCaps = new ClientCutTextCaps(session.getConfig().getMaxSizePerFormat());
-        sendMessage(clientCutTextCaps);
+    void handleExtendedClipboardCaps() throws IOException {
+        session.setReceivedExtendedClipboardCaps(true);
+
+        // Sending our own caps is optional. Without them, the server assumes that we accept text up to 20 MiB,
+        // so only send them if sizes are configured, as empty caps would indicate that we accept no formats
+        var maxSizePerFormat = session.getConfig().getMaxSizePerFormat();
+        if (!maxSizePerFormat.isEmpty()) {
+            sendMessage(new ClientCutTextCaps(maxSizePerFormat));
+        }
     }
 
     void copyText(String text) throws IOException {
-        if (session.getConfig().isEnableExtendedClipboard()) {
-            sendClientCutTextCaps();
-
+        // The extended format may only be used if the server indicated that it supports it
+        if (session.getConfig().isEnableExtendedClipboard() && session.isReceivedExtendedClipboardCaps()) {
             ClientCutTextExtendedClipboard clientCutTextExtendedClipboard = new ClientCutTextExtendedClipboard(text);
             sendMessage(clientCutTextExtendedClipboard);
         } else {

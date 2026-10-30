@@ -40,6 +40,24 @@ class ServerCutTextTest extends Specification {
         result.text == 'test'
     }
 
+    def "should decode an extended format caps message"() {
+        given:
+        def input = new ByteArrayInputStream([
+                0x03, // message type
+                0x00, 0x00, 0x00, // padding
+                -0x01, -0x01, -0x01, -0x08, // data length = -8
+                0x01, 0x00, 0x00, 0x01,  // flags = caps, text
+                0x01, 0x40, 0x00, 0x00 // text size = 20 MiB
+        ] as byte[])
+
+        when:
+        def result = ServerCutText.decode(input)
+
+        then:
+        result.caps
+        result.text == ''
+    }
+
     def "should reject an extended format message too short to contain flags"() {
         given:
         def input = new ByteArrayInputStream([
