@@ -3,6 +3,7 @@ package com.shinyhut.vernacular.client.rendering;
 import com.shinyhut.vernacular.client.VernacularConfig;
 import com.shinyhut.vernacular.client.VncSession;
 import com.shinyhut.vernacular.client.exceptions.UnexpectedVncException;
+import com.shinyhut.vernacular.client.exceptions.UnsupportedEncodingException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.client.rendering.renderers.*;
 import com.shinyhut.vernacular.protocol.messages.*;
@@ -53,7 +54,11 @@ public class Framebuffer {
                     updateExtendedDesktopSize(rectangle, in);
                     desktopSizeChanged = true;
                 } else {
-                    renderers.get(rectangle.getEncoding()).render(in, frame, rectangle);
+                    Renderer renderer = renderers.get(rectangle.getEncoding());
+                    if (renderer == null) {
+                        throw new UnsupportedEncodingException(rectangle.getEncoding().getCode());
+                    }
+                    renderer.render(in, frame, rectangle);
                 }
             }
             paint();

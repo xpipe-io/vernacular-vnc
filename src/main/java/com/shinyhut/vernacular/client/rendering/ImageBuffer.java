@@ -29,17 +29,27 @@ public class ImageBuffer {
     }
 
     private int flatIndex(int x, int y) {
-        return y * width + (x % width);
+        return y * width + x;
+    }
+
+    public boolean contains(int x, int y) {
+        return x >= 0 && y >= 0 && x < width && y < height;
     }
 
     public void set(int x, int y, int color) {
-        buffer[flatIndex(x, y)] = color;
+        if (contains(x, y)) {
+            buffer[flatIndex(x, y)] = color;
+        }
     }
 
     public void fillRect(int x, int y, int width, int height, int color) {
-        for (int ox = 0; ox < width; ox++) {
-            for (int oy = 0; oy < height; oy++) {
-                buffer[flatIndex(x + ox, y + oy)] = color;
+        int startX = Math.max(x, 0);
+        int startY = Math.max(y, 0);
+        int endX = Math.min(x + width, this.width);
+        int endY = Math.min(y + height, this.height);
+        for (int oy = startY; oy < endY; oy++) {
+            for (int ox = startX; ox < endX; ox++) {
+                buffer[flatIndex(ox, oy)] = color;
             }
         }
     }
@@ -49,9 +59,16 @@ public class ImageBuffer {
     }
 
     public void duplicate(int x, int y, int width, int height, int targetX, int targetY) {
-        for (int ox = 0; ox < width; ox++) {
-            for (int oy = 0; oy < height; oy++) {
-                buffer[flatIndex(targetX + ox, targetY + oy)] = buffer[flatIndex(x + ox,y + oy)];
+        // Copy the source region first, as it may overlap with the target region
+        int[] source = new int[width * height];
+        for (int oy = 0; oy < height; oy++) {
+            for (int ox = 0; ox < width; ox++) {
+                source[oy * width + ox] = contains(x + ox, y + oy) ? buffer[flatIndex(x + ox, y + oy)] : 0;
+            }
+        }
+        for (int oy = 0; oy < height; oy++) {
+            for (int ox = 0; ox < width; ox++) {
+                set(targetX + ox, targetY + oy, source[oy * width + ox]);
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.shinyhut.vernacular.client.rendering.renderers;
 
+import com.shinyhut.vernacular.client.exceptions.InvalidMessageException;
 import com.shinyhut.vernacular.client.exceptions.UnexpectedVncException;
 import com.shinyhut.vernacular.client.exceptions.VncException;
 import com.shinyhut.vernacular.client.rendering.ImageBuffer;
@@ -65,6 +66,10 @@ public class HextileRenderer implements Renderer {
                         Pixel foreground = hasForeground ? pixelDecoder.decode(in, pixelFormat) : lastForeground;
                         lastBackground = background;
                         lastForeground = foreground;
+
+                        if (background == null || (hasSubrects && !subrectsColored && foreground == null)) {
+                            throw new InvalidMessageException("Hextile");
+                        }
 
                         destination.fillRect(tileTopLeftX, tileTopLeftY, tileWidth, tileHeight, background.toInt());
 
