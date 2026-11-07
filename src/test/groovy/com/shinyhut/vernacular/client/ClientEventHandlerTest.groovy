@@ -22,7 +22,7 @@ class ClientEventHandlerTest extends Specification {
         bytes[0..11] == [
                 0x06, // message type
                 0x00, 0x00, 0x00, // padding
-                0x00, 0x00, 0x00, 0x04, // length = flags only, as no sizes are configured
+                0xff, 0xff, 0xff, 0xfc, // length = -(flags only), as no sizes are configured
                 0x1f, 0x00, 0x00, 0x00 // flags = caps, request, peek, notify, provide
         ] as byte[]
         bytes[12] == 0x06

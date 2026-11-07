@@ -113,7 +113,14 @@ public class Framebuffer {
             var dataInput = new DataInputStream(in);
             int screens = dataInput.readUnsignedByte();
             dataInput.readFully(new byte[3 + (screens * 16)]);
-            resizeFramebuffer(rect);
+
+            // An x position of 1 means that this is the reply to our own resize request, with the status in the y position.
+            // If the request failed, all other fields are undefined according to the spec. Some servers like neatvnc
+            // echo the requested size in that case, so it must not be used. For other reasons, the y position is ignored
+            boolean failedRequest = rect.getX() == 1 && rect.getY() != 0;
+            if (!failedRequest) {
+                resizeFramebuffer(rect);
+            }
         } catch (IOException e) {
             throw new UnexpectedVncException(e);
         }

@@ -17,7 +17,7 @@ class ClientCutTextCapsTest extends Specification {
         output.toByteArray() == [
                 0x06, // message type
                 0x00, 0x00, 0x00, // padding
-                0x00, 0x00, 0x00, 0x08, // length = flags + 1 size
+                0xff, 0xff, 0xff, 0xf8, // length = -(flags + 1 size)
                 0x1f, 0x00, 0x00, 0x04, // flags = caps, request, peek, notify, provide, html
                 0x00, 0x00, 0x04, 0x00 // html size = 1024
         ] as byte[]
@@ -38,7 +38,7 @@ class ClientCutTextCapsTest extends Specification {
         output.toByteArray() == [
                 0x06, // message type
                 0x00, 0x00, 0x00, // padding
-                0x00, 0x00, 0x00, 0x0c, // length = flags + 2 sizes
+                0xff, 0xff, 0xff, 0xf4, // length = -(flags + 2 sizes)
                 0x1f, 0x00, 0x00, 0x05, // flags = caps, request, peek, notify, provide, html, text
                 0x00, 0x00, 0x00, 0x01, // text size
                 0x00, 0x00, 0x00, 0x02 // html size

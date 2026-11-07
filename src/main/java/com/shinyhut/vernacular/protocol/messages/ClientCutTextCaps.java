@@ -42,7 +42,8 @@ public class ClientCutTextCaps  implements Encodable {
         dataOutput.writeByte(0x06);
         dataOutput.write(new byte[3]);
 
-        dataOutput.writeInt(formatSizes.size() + 4);
+        // Extended clipboard messages are identified by a negative length
+        dataOutput.writeInt(-(formatSizes.size() + 4));
         dataOutput.writeInt(flags);
         dataOutput.write(formatSizes.toByteArray());
     }
